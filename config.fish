@@ -11,14 +11,13 @@ if status is-interactive
     fish_add_path ~/.cargo/bin
     test -d "$JAVA_HOME/bin"; and fish_add_path "$JAVA_HOME/bin"
 
-    # Safety Aliases
+    # Aliases
     alias cp 'cp -i'
     alias mv 'mv -i'
     alias dust 'dust -r -d 1'
-    # rm -> trash (do NOT use --save here)
     alias rm '/home/lewis/.local/bin/trash'
-    alias tree 'tree -F -L 2 --filelimit 20'
-
+    alias tree 'tree -F -L 2 --dirsfirst --filelimit 20'
+    alias mkdir 'mkdir -p'
 
     # sudo wrapper: if "sudo rm ..." then use trash as root
     function sudo
@@ -30,10 +29,12 @@ if status is-interactive
     end
 
     function show_timestamp_after_command --on-event fish_postexec
-        set_color grey
-        date "+[%d/%m/%y %H:%M:%S]"
-        set_color normal
-    end
+    	set_color grey
+    	# Display the current date/time and the duration in ms
+    	echo (date "+[%d/%m/%y %H:%M:%S]") "$CMD_DURATION ms elapsed"
+    	set_color normal
+    end    
+
 
     # Only bind Ctrl+Backspace in Fish, pass through to applications otherwise
     function smart_ctrl_backspace
@@ -51,8 +52,7 @@ if status is-interactive
     bind \b smart_ctrl_backspace
 
     # Map Ctrl+Shift+C to send SIGINT
-    bind \C-C 'commandline -f cancel'
-
+    bind \cC 'commandline -f cancel'
 end
 
 nvidia-settings -a "[gpu:0]/GPUPowerMizerMode=1" > /dev/null 2>&1
