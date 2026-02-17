@@ -1,6 +1,6 @@
 # Fish Shell Configuration Summary
 
-* **Smart Navigation:** Replaces standard `cd` with **Zoxide** (smart jump) for faster directory traversal.
+* **Smart Navigation:** Replaces standard `cd` with **Zoxide** (smart jump) for faster directory traversal, with `cdi` for `zi`.
 * **Consistent Java:** Sets `JAVA_HOME` to OpenJDK 21 and adds the binaries to `PATH`.
 * **Secret Management:** Exports `PASSGEN_PEPPER` for password generation tooling.
 * **Extended History:** Increases capacity to **50,000** commands.
@@ -104,7 +104,7 @@ zoxide init fish --cmd cd | source
 
 * Initializes **zoxide**, a smarter `cd` command.
 * `--cmd cd`: Replaces the standard `cd` command with zoxide's logic (jumping to directories based on frequency and recency).
-
+* Enable `cdi` for interactive fuzzy-finding via fzf, allowing for visual selection of deeply nested project paths.
 ---
 
 ## Aliases
