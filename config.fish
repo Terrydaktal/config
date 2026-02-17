@@ -53,6 +53,7 @@ if status is-interactive
 
     # Map Ctrl+Shift+C to send SIGINT
     bind \cC 'commandline -f cancel'
+    zoxide init fish --cmd cd | source
 end
 
 nvidia-settings -a "[gpu:0]/GPUPowerMizerMode=1" > /dev/null 2>&1
