@@ -7,21 +7,21 @@
 * **Visuals:** Custom `LS_COLORS` for distinct file types and symlinks.
 * **Path Priority:** Prioritizes `~/.local/bin` and `~/.cargo/bin`.
 * **Safety & Convenience Aliases:**
-* `cp -i` / `mv -i`: Prompts before overwriting.
-* `mkdir`: Defaults to `mkdir -p` (creates parent directories automatically).
-* `rm`: Routes to a local `trash` script (safe delete).
-* `sudo rm`: Intercepted to run `sudo trash` (prevents root-level permanent deletion).
+   * `cp -i` / `mv -i`: Prompts before overwriting.
+   * `mkdir`: Defaults to `mkdir -p` (creates parent directories automatically).
+   * `rm`: Routes to a local `trash` script (safe delete).
+   * `sudo rm`: Intercepted to run `sudo trash` (prevents root-level permanent deletion).
 
 
 * **Inspection Tools:**
-* `dust`: Shallow recursion (`-d 1`) for quick disk usage checks.
-* `tree`: Limits depth (`-L 2`) and file count, and groups directories first (`--dirsfirst`).
+   * `dust`: Shallow recursion (`-d 1`) for quick disk usage checks.
+   * `tree`: Limits depth (`-L 2`) and file count, and groups directories first (`--dirsfirst`).
 
 
 * **Command Telemetry:** Prints the **timestamp** and **execution duration (ms)** after every command.
 * **Keybindings:**
-* Smart Ctrl+Backspace: Deletes words in the prompt but passes through to apps if the line is empty.
-* Ctrl+C (mapped via comment as Ctrl+Shift+C): Cancels the current command line input.
+   * Smart Ctrl+Backspace: Deletes words in the prompt but passes through to apps if the line is empty.
+   * Ctrl+C (mapped via comment as Ctrl+Shift+C): Cancels the current command line input.
 
 
 * **System:** Applies NVIDIA GPU power settings and scales PCManFM UI (DPI 1.5).
