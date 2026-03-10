@@ -14,10 +14,13 @@ if status is-interactive
     # Aliases
     alias cp 'cp -i'
     alias mv 'mv -i'
-    alias dust 'dust -r -d 1'
+    alias dust 'dust -r -d 1' #counts multiple hardlinks as one unless -s
     alias rm '/home/lewis/.local/bin/trash'
     alias tree 'tree -F -L 2 --dirsfirst --filelimit 20'
     alias mkdir 'mkdir -p'
+    
+    function expose; ln -sf (realpath $argv) ~/.local/bin/(basename $argv); end; abbr -a expose expose
+    function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
 
     # sudo wrapper: if "sudo rm ..." then use trash as root
     function sudo
@@ -34,7 +37,6 @@ if status is-interactive
     	echo (date "+[%d/%m/%y %H:%M:%S]") "$CMD_DURATION ms elapsed"
     	set_color normal
     end    
-
 
     # Only bind Ctrl+Backspace in Fish, pass through to applications otherwise
     function smart_ctrl_backspace
