@@ -26,6 +26,6 @@
     - If command line is multi-line or non-empty → performs `backward-kill-word` (delete word left of cursor).  
     - If command line is empty → inserts a literal Ctrl+W (`\x17`) so the key can be passed through to terminal applications (e.g., in `less` or `vim`).  
   - **Ctrl+Shift+C**: Sends SIGINT (`cancel`) – useful for interrupting commands without leaving the shell.  
-- **zoxide Integration**: Initializes `zoxide` with the `cd` command, enabling smart directory jumping (e.g., `z dirname`).  
+- **zoxide Integration**: Replaces `cd` command with `zoxide z` enabling smart directory jumping, and `cdi` for `zi` allowing fuzzy lookup.  
 - **GPU Power Management**: Runs `nvidia-settings` to set GPU power mode to “Prefer Maximum Performance” (if NVIDIA drivers are present). Output is silenced.  
 - **pcmanfm Scaling**: Alias `pcmanfm` to launch with `GDK_DPI_SCALE=1.5`, ensuring proper UI scaling for high‑DPI displays.
