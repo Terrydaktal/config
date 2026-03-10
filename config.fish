@@ -37,6 +37,18 @@ if status is-interactive
     	echo (date "+[%d/%m/%y %H:%M:%S]") "$CMD_DURATION ms elapsed"
     	set_color normal
     end    
+    
+    function clipboard
+        if not isatty stdin
+            # If data is being piped in (e.g. cat file | clipboard)
+            fish_clipboard_copy
+        else if count $argv > /dev/null
+            # If a filename was passed as an argument (e.g. clipboard filename)
+            fish_clipboard_copy < $argv[1]
+        else
+            echo "Usage: cat file | clipboard  OR  clipboard filename"
+        end
+    end
 
     # Only bind Ctrl+Backspace in Fish, pass through to applications otherwise
     function smart_ctrl_backspace
