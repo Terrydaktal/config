@@ -3,7 +3,7 @@ if status is-interactive
     # Environment Variables
     set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
     set -gx PASSGEN_PEPPER "REDACTED"
-    set -gx fish_history_limit 50000
+    set -gx fish_history_limit 256000
     set -gx LS_COLORS "$LS_COLORS:ln=01;36:or=01;31:mi=01;31:*.txt=01;36:*.py=01;32:*.js=01;33:*.cpp=01;31:*.sh=01;35:"
 
     # Path
