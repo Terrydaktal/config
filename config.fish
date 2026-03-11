@@ -3,9 +3,8 @@ if status is-interactive
     # Environment Variables
     set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
     set -gx PASSGEN_PEPPER "REDACTED"
-    set -gx fish_history_limit 256000
-    set -gx LS_COLORS "$LS_COLORS:ln=01;36:or=01;31:mi=01;31:*.txt=01;36:*.py=01;32:*.js=01;33:*.cpp=01;31:*.sh=01;35:"
-
+    set -gx fish_history_limit 256000 
+    
     # Path
     fish_add_path ~/.local/bin
     fish_add_path ~/.cargo/bin
@@ -18,7 +17,10 @@ if status is-interactive
     alias rm '/home/lewis/.local/bin/trash'
     alias tree 'tree -F -L 2 --dirsfirst --filelimit 20'
     alias mkdir 'mkdir -p'
-    
+    alias ls 'eza --group-directories-first'
+    alias ll 'eza -lgh --git --group-directories-first'
+    alias la 'eza -lgAh --git --group-directories-first'
+
     function expose; ln -sf (realpath $argv) ~/.local/bin/(basename $argv); end; abbr -a expose expose
     function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
 
@@ -64,6 +66,7 @@ if status is-interactive
     end
 
     bind \b smart_ctrl_backspace
+
     zoxide init fish --cmd cd | source
 end
 
