@@ -3,7 +3,7 @@
   - `JAVA_HOME` set to `/usr/lib/jvm/java-21-openjdk-amd64`  
   - `PASSGEN_PEPPER` set to a redacted value (likely for a password generator)  
   - `fish_history_limit` set to `256000` (increases the number of previous commands Fish remembers in its history file)  
-  - `LS_COLORS` extended with custom colors for file types (symlinks, orphaned links, missing files, and extensions like `.txt`, `.py`, `.js`, `.cpp`, `.sh`)  
+
 - **PATH Modifications**:  
   - Adds `~/.local/bin` to PATH (user local binaries)  
   - Adds `~/.cargo/bin` to PATH (Rust Cargo binaries)  
@@ -15,6 +15,9 @@
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
   - `tree` → `tree -F -L 2 --dirsfirst --filelimit 20` (show file type indicators, max depth 2, directories first, limit entries per dir to 20)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
+  - `ls` → `eza --group-directories-first` (modern `ls` replacement with directories first)  
+  - `ll` → `eza -lgh --git --group-directories-first` (long format, human readable, git status)  
+  - `la` → `eza -lgAh --git --group-directories-first` (all files, long format, git status)  
 - **Custom Functions & Abbreviations**:  
   - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere.  
   - **`unexpose` function + abbreviation**: Removes the symlink for a given file from `~/.local/bin` (with safety check).  
