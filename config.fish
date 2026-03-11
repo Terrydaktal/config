@@ -64,9 +64,6 @@ if status is-interactive
     end
 
     bind \b smart_ctrl_backspace
-
-    # Map Ctrl+Shift+C to send SIGINT
-    bind \cC 'commandline -f cancel'
     zoxide init fish --cmd cd | source
 end
 
