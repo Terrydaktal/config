@@ -15,11 +15,11 @@
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
   - `tree` → `tree -F -L 2 --dirsfirst --filelimit 20` (show file type indicators, max depth 2, directories first, limit entries per dir to 20)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
-  - `ls` → `eza --group-directories-first` (modern `ls` replacement with directories first)  
-  - `ll` → `eza -lgh --git --group-directories-first` (long format, human readable, git status)  
-  - `la` → `eza -lgAh --git --group-directories-first` (all files, long format, git status)  
+  - `ls` → `eza --group-directories-first --hyperlink` (modern `ls` replacement with directories first)  
+  - `ll` → `eza -lgh --git --group-directories-first --hyperlink` (long format, human readable, git status, hyperlink)  
+  - `la` → `eza -lgAh --git --group-directories-first --hyperlink` (all files, long format, git status)  
 - **Custom Functions & Abbreviations**:  
-  - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere.  
+  - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can be provided to give the link a name other than the current binary name.  
   - **`unexpose` function + abbreviation**: Removes the symlink for a given file from `~/.local/bin` (with safety check).  
   - **`sudo` wrapper**: If `sudo rm` is used, it runs the trash script as root instead of plain `rm`; otherwise passes through to normal `sudo`.  
   - **`show_timestamp_after_command`** (event: `fish_postexec`): After each command, prints a timestamp (`[DD/MM/YY HH:MM:SS]`) and the command duration in milliseconds, in grey color.  
