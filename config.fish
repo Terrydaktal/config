@@ -20,6 +20,7 @@ if status is-interactive
     alias ls 'eza --group-directories-first --hyperlink'
     alias ll 'eza -lgh --git --group-directories-first --hyperlink'
     alias la 'eza -lgAh --git --group-directories-first --hyperlink'
+    alias pwd='printf "\e]8;;file://%s%s\a%s\e]8;;\a\n" (hostname) (string escape --style=url -- $PWD) "$PWD"'    
 
     function expose; set -l target (realpath $argv[1]); set -l name (test (count $argv) -gt 1; and echo $argv[2]; or basename $argv[1]); ln -sf $target ~/.local/bin/$name; echo "Exposed $target as $name"; end; abbr -a expose expose
     function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
