@@ -17,7 +17,8 @@
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
   - `ls` → `eza --group-directories-first --hyperlink` (modern `ls` replacement with directories first)  
   - `ll` → `eza -lgh --git --group-directories-first --hyperlink` (long format, human readable, git status, hyperlink)  
-  - `la` → `eza -lgAh --git --group-directories-first --hyperlink` (all files, long format, git status)  
+  - `la` → `eza -lgAh --git --group-directories-first --hyperlink` (all files, long format, git status)
+  - `pwd` outputs a hyperlink
 - **Custom Functions & Abbreviations**:  
   - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can be provided to give the link a name other than the current binary name.  
   - **`unexpose` function + abbreviation**: Removes the symlink for a given file from `~/.local/bin` (with safety check).  
