@@ -11,10 +11,10 @@ if status is-interactive
     test -d "$JAVA_HOME/bin"; and fish_add_path "$JAVA_HOME/bin"
 
     # Aliases
-    alias cp 'cp -i'
-    alias mv 'mv -i'
+    alias mv '/home/lewis/.local/bin/move'
     alias dust 'dust -r -d 1' #counts multiple hardlinks as one unless -s
     alias rm '/home/lewis/.local/bin/trash'
+    alias cp '/home/lewis/.local/bin/copy'
     alias tree 'tree -F -L 2 --dirsfirst --filelimit 20'
     alias mkdir 'mkdir -p'
     alias ls 'eza --group-directories-first --hyperlink'
@@ -26,48 +26,17 @@ if status is-interactive
     function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
 
     # sudo wrapper: if "sudo rm ..." then use trash as root
-    function sudo
-        if test (count $argv) -ge 1; and test "$argv[1]" = "rm"
-            command sudo /home/lewis/.local/bin/trash $argv[2..-1]
-        else
-            command sudo $argv
-        end
-    end
-
-    function show_timestamp_after_command --on-event fish_postexec
-    	set_color grey
-    	# Display the current date/time and the duration in ms
-    	echo (date "+[%d/%m/%y %H:%M:%S]") "$CMD_DURATION ms elapsed"
-    	set_color normal
-    end    
+    function sudo; test (count $argv) -ge 1; and test "$argv[1]" = "rm"; and command sudo /home/lewis/.local/bin/trash $argv[2..-1]; or command sudo $argv; end
     
-    function clipboard
-        if not isatty stdin
-            # If data is being piped in (e.g. cat file | clipboard)
-            fish_clipboard_copy
-        else if count $argv > /dev/null
-            # If a filename was passed as an argument (e.g. clipboard filename)
-            fish_clipboard_copy < $argv[1]
-        else
-            echo "Usage: cat file | clipboard  OR  clipboard filename"
-        end
-    end
-
+    function show_timestamp_after_command --on-event fish_postexec; set_color grey; echo (date "+[%d/%m/%y %H:%M:%S]") "$CMD_DURATION ms elapsed"; set_color normal; end
+    function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
+    
     # Only bind Ctrl+Backspace in Fish, pass through to applications otherwise
-    function smart_ctrl_backspace
-        set cmd (commandline)
-
-        if string match -qr '.*\n.*' -- "$cmd"
-            commandline -f backward-kill-word
-        else if test -n "$cmd"
-            commandline -f backward-kill-word
-        else
-            commandline -i -- "\x17"
-        end
-    end
-
+    function smart_ctrl_backspace; set -l c (commandline); if string match -qr '.*\n.*' -- "$c"; commandline -f backward-kill-word; else if test -n "$c"; commandline -f backward-kill-word; else; commandline -i -- "\x17"; end; end
+   
+    bind \e\[1\;5A "set -l r (zoxide query -i); if test -n \"\$r\"; if string match -q '* *' \"\$r\"; commandline -i \"'\$r'\"; else; commandline -i \"\$r\"; end; end; commandline -f repaint"
     bind \b smart_ctrl_backspace
-
+   
     zoxide init fish --cmd cd | source
 end
 
