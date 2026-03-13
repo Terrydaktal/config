@@ -10,8 +10,8 @@
   - Conditionally adds `$JAVA_HOME/bin` if the directory exists  
 
 - **Aliases**:  
-  - `cp` → `/home/lewis/.local/bin/copy` (custom copy script, presumably with safety features)  
-  - `mv` → `/home/lewis/.local/bin/move` (custom move script, presumably with safety features)  
+  - `cp` → `/home/lewis/.local/bin/copy` (custom copy script with rsync)  
+  - `mv` → `/home/lewis/.local/bin/move` (custom move script with rsync)  
   - `dust` → `dust -r -d 1` (disk usage tool with reverse sort and depth 1, counting hardlinks once)  
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
   - `tree` → `tree -F -L 2 --dirsfirst --filelimit 20` (show file type indicators, max depth 2, directories first, limit entries per dir to 20)  
