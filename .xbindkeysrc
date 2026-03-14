@@ -1,0 +1,95 @@
+# Bind print screen to flameshot print screen
+"flameshot gui"
+    Print
+
+# Show CopyQ
+"copyq show"
+    Control+Shift+Mod4+Up
+
+#kill
+"bash -c 'wid=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2); if [ -n "$wid" ]; then wmctrl -i -c "$wid"; fi'"
+ Control+m:0x40 + b:2
+
+# Debounced Minimize (Win + Wheel Down)
+"bash -c 'mkdir /tmp/xbind_lock 2>/dev/null || exit 0; wid=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2); echo $wid >> /tmp/min_stack; xdotool windowminimize $wid; sleep 0.3; rmdir /tmp/xbind_lock'"
+  m:0x40 + b:5
+
+# Restore a window that has been minimized
+"bash -c 'mkdir /tmp/xbind_lock 2>/dev/null || exit 0; wid=$(tail -n 1 /tmp/min_stack); if [ -n \"$wid\" ]; then wmctrl -i -R $wid; sed -i \"\$d\" /tmp/min_stack; fi; sleep 0.3; rmdir /tmp/xbind_lock'"
+  m:0x40 + b:4
+
+# Mouse Back -> Fish prevd (Alt + Left)
+"if xdotool getactivewindow getwindowname | grep -i 'terminal'; then xte 'keydown Alt_L' 'key Left' 'keyup Alt_L'; else xdotool click 8; fi"
+b:8
+
+# Mouse Forward -> Fish nextd (Alt + Right)
+"if xdotool getactivewindow getwindowname | grep -i 'terminal'; then xte 'keydown Alt_L' 'key Right' 'keyup Alt_L'; else xdotool click 9; fi"
+b:9
+
+
+#open new
+# Slot 1
+"/home/lewis/.local/bin/launch-slot 1"
+    Control+Mod4 + a
+
+"/home/lewis/.local/bin/launch-slot 1"
+    Control+Mod4 + 1
+
+# Slot 2
+"/home/lewis/.local/bin/launch-slot 2"
+    Control+Mod4 + s
+
+# Slot 2
+"/home/lewis/.local/bin/launch-slot 2"
+    Control+Mod4 + 2
+
+# Slot 3
+"/home/lewis/.local/bin/launch-slot 3"
+    Control+Mod4 + d
+
+# Slot 3
+"/home/lewis/.local/bin/launch-slot 3"
+    Control+Mod4 + 3
+
+# Slot 4
+"/home/lewis/.local/bin/launch-slot 4"
+    Control+Mod4 + f
+
+# Slot 4
+"/home/lewis/.local/bin/launch-slot 4"
+    Control+Mod4 + 4
+
+# Slot 5
+"/home/lewis/.local/bin/launch-slot 5"
+    Control+Mod4 + g
+
+# Slot 6
+"/home/lewis/.local/bin/launch-slot 5"
+    Control+Mod4 + 6
+
+# Slot 7
+"/home/lewis/.local/bin/launch-slot 5"
+    Control+Mod4 + 7
+
+# Slot 8
+"/home/lewis/.local/bin/launch-slot 5"
+    Control+Mod4 + 8
+
+# Slot 9
+"/home/lewis/.local/bin/launch-slot 5"
+    Control+Mod4 + 9
+
+# Slot 0
+"/home/lewis/.local/bin/launch-slot 5"
+    Control+Mod4 + 0
+
+"~/Dev/faster-whisperer/trigger.sh"
+    m:0x0 + c:82
+
+#Cycle windows backward
+"cycle-windows forward"
+    Alt+Tab
+
+#Cycle windows forward
+"cycle-windows backward"
+    Alt+Shift+Tab
