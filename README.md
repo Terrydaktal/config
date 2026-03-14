@@ -107,7 +107,7 @@ xfce4-terminal
      (gtk_accel_path "<Actions>/terminal-window/paste" "<Primary>v")
      (gtk_accel_path "<Actions>/terminal-window/copy" "<Primary>c")
      ```
-      xfce4-terminal handles sending the SIGINT. When Ctrl+C is bound to copy it sends SIGINT on Ctrl+Shift+C instead (even though this isn't made clear on the preferences)
+  xfce4-terminal handles sending the SIGINT. When Ctrl+C is bound to copy it sends SIGINT on Ctrl+Shift+C instead (even though this isn't made clear on the preferences)
 - terminalrc:
      ```
      MiscShowMenubar=FALSE
