@@ -27,7 +27,7 @@ b:8
 b:9
 
 
-#open new
+#Open new rather than existing window
 # Slot 1
 "/home/lewis/.local/bin/launch-slot 1"
     Control+Mod4 + a
@@ -64,23 +64,23 @@ b:9
     Control+Mod4 + g
 
 # Slot 6
-"/home/lewis/.local/bin/launch-slot 5"
+"/home/lewis/.local/bin/launch-slot 6"
     Control+Mod4 + 6
 
 # Slot 7
-"/home/lewis/.local/bin/launch-slot 5"
+"/home/lewis/.local/bin/launch-slot 7"
     Control+Mod4 + 7
 
 # Slot 8
-"/home/lewis/.local/bin/launch-slot 5"
+"/home/lewis/.local/bin/launch-slot 8"
     Control+Mod4 + 8
 
 # Slot 9
-"/home/lewis/.local/bin/launch-slot 5"
+"/home/lewis/.local/bin/launch-slot 9"
     Control+Mod4 + 9
 
 # Slot 0
-"/home/lewis/.local/bin/launch-slot 5"
+"/home/lewis/.local/bin/launch-slot 0"
     Control+Mod4 + 0
 
 "~/Dev/faster-whisperer/trigger.sh"
