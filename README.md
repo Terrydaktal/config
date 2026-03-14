@@ -46,8 +46,6 @@ config.fish
 .xbindkeys
 ----
 
-# Xbindkeys Configuration
-
 This configuration file defines custom keyboard and mouse shortcuts using `xbindkeys`, a daemon that binds commands to input events. The settings are designed to enhance window management, application launching, and navigation.
 
 ## Key Bindings
