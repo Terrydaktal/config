@@ -1,3 +1,6 @@
+config.fish
+-----
+
 - **Interactive Shell Detection**: The configuration inside `if status is-interactive` only applies when the shell is in interactive mode (not for scripts).  
 - **Environment Variables**:  
   - `JAVA_HOME` set to `/usr/lib/jvm/java-21-openjdk-amd64`  
