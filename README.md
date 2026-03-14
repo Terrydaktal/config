@@ -42,3 +42,63 @@ config.fish
 - **GPU Power Management**: Runs `nvidia-settings` to set GPU power mode to “Prefer Maximum Performance” (if NVIDIA drivers are present). Output is silenced.  
 
 - **pcmanfm Scaling**: Alias `pcmanfm` to launch with `GDK_DPI_SCALE=1.5`, ensuring proper UI scaling for high‑DPI displays.
+
+.xbindkeys
+----
+
+# Xbindkeys Configuration
+
+This configuration file defines custom keyboard and mouse shortcuts using `xbindkeys`, a daemon that binds commands to input events. The settings are designed to enhance window management, application launching, and navigation.
+
+## Key Bindings
+
+### Screenshot
+- **Print Screen** → `flameshot gui`  
+  Launches Flameshot’s GUI for taking and annotating screenshots.
+
+### Clipboard Manager
+- **Ctrl + Shift + Super + Up** → `copyq show`  
+  Shows the CopyQ clipboard manager window.
+
+### Window Management
+
+- **Ctrl + Middle Click** → Kill window under mouse  
+  - Command: `bash -c 'wid=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2); if [ -n "$wid" ]; then wmctrl -i -c "$wid"; fi'`  
+  Closes the window currently under the mouse cursor.
+
+- **Mod4 + Wheel Down** → Debounced minimize  
+  - Command: `bash -c 'mkdir /tmp/xbind_lock 2>/dev/null || exit 0; wid=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2); echo $wid >> /tmp/min_stack; xdotool windowminimize $wid; sleep 0.3; rmdir /tmp/xbind_lock'`  
+  Minimizes the window under the mouse. Uses a lock file to debounce rapid wheel scrolling.
+
+- **Mod4 + Wheel Up** → Restore last minimized window  
+  - Command: `bash -c 'mkdir /tmp/xbind_lock 2>/dev/null || exit 0; wid=$(tail -n 1 /tmp/min_stack); if [ -n \"$wid\" ]; then wmctrl -i -R $wid; sed -i \"\$d\" /tmp/min_stack; fi; sleep 0.3; rmdir /tmp/xbind_lock'`  
+  Restores the most recently minimized window from the stack. Also debounced.
+
+- **Alt + Tab** → Cycle windows forward  
+  - Command: `cycle-windows forward`  
+  Cycles through open windows in forward direction (custom script).
+
+- **Alt + Shift + Tab** → Cycle windows backward  
+  - Command: `cycle-windows backward`  
+  Cycles through open windows in reverse direction.
+
+### Mouse Navigation (Back/Forward Buttons)
+
+- **Mouse Back Button (Button 8)**  
+  - If the active window is a terminal (name contains “terminal”): sends **Alt + Left** (`xte 'keydown Alt_L' 'key Left' 'keyup Alt_L'`) – equivalent to `prevd` in Fish.  
+  - Otherwise: sends a normal **back click** (`xdotool click 8`).
+
+- **Mouse Forward Button (Button 9)**  
+  - If the active window is a terminal: sends **Alt + Right** – equivalent to `nextd` in Fish.  
+  - Otherwise: sends a normal **forward click** (`xdotool click 9`).
+
+### Application Launcher Slots
+
+The script `/home/lewis/.local/bin/launch-slot` is used to launch a fresh new application in the specified taskbar slot. Each slot can be triggered by one or two key combinations. For slot 1 it is `Ctrl + Mod4 + 1`
+
+*Note: Multiple number keys are bound to Slot 5; this may be intentional or a placeholder for additional slots.*
+
+### Speech-to-Text Trigger
+- **Keycode 82** (often the “Menu” key or a special key) → `~/Dev/faster-whisperer/trigger.sh`  
+  Executes the Faster Whisperer trigger script (voice transcription).
+
