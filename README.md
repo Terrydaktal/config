@@ -100,3 +100,39 @@ The script `/home/lewis/.local/bin/launch-slot` is used to launch a fresh new ap
 - **Keycode 82** (often the “Menu” key or a special key) → `~/Dev/faster-whisperer/trigger.sh`  
   Executes the Faster Whisperer trigger script (voice transcription).
 
+xfce4-terminal
+----
+- accels.scm:
+     ```
+     (gtk_accel_path "<Actions>/terminal-window/paste" "<Primary>v")
+     (gtk_accel_path "<Actions>/terminal-window/copy" "<Primary>c")
+     ```
+- terminalrc:
+     ```
+     MiscShowMenubar=FALSE
+     ```
+- ~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml:
+    ```
+    <?xml version="1.1" encoding="UTF-8"?>
+
+    <channel name="xfce4-terminal" version="1.0">
+      <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_TRANSPARENT"/>
+      <property name="background-darkness" type="double" value="0.94999999999999996"/>
+      <property name="color-background" type="string" value="#24241f1f3131"/>
+      <property name="color-cursor" type="string" value="#867f81c281c2"/>
+      <property name="color-palette" type="string" value="rgb(0,0,0);rgb(204,0,0);rgb(78,154,6);rgb(196,160,0);rgb(52,101,164);rgb(117,80,123);rgb(6,152,154);rgb(211,215,207);rgb(85,87,83);rgb(239,41,41);rgb(138,226,52);rgb(252,233,79);rgb(115,159,207);rgb(173,127,168);rgb(52,226,226);rgb(238,238,236)"/>
+      <property name="font-name" type="string" value="Hack 14"/>
+      <property name="misc-always-show-tabs" type="bool" value="false"/>
+      <property name="misc-bell" type="bool" value="false"/>
+      <property name="misc-borders-default" type="bool" value="true"/>
+      <property name="misc-menubar-default" type="bool" value="false"/>
+      <property name="misc-confirm-close" type="bool" value="false"/>
+      <property name="misc-show-unsafe-paste-dialog" type="bool" value="false"/>
+      <property name="command-login-shell" type="bool" value="false"/>
+      <property name="run-custom-command" type="bool" value="true"/>
+      <property name="custom-command" type="string" value="fish"/>
+      <property name="misc-cursor-shape" type="string" value="TERMINAL_CURSOR_SHAPE_BLOCK"/>
+      <property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>
+      <property name="scrolling-lines" type="uint" value="50000"/>
+    </channel>
+    ```
