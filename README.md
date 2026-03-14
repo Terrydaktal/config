@@ -102,8 +102,8 @@ The script `/home/lewis/.local/bin/launch-slot` is used to launch a fresh new ap
 
 xfce4-terminal
 ----
-- *accels.scm*:
+- **accels.scm**:
   xfce4-terminal handles sending the SIGINT. When Ctrl+C is bound to copy it sends SIGINT on Ctrl+Shift+C instead (even though this isn't made clear on the preferences)
   
-- *~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml*:
+- **~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml**:
 This configuration defines a highly customised Xfce Terminal that uses the fish shell as a custom command (not a login shell) with a block cursor shape, a hidden menubar, and no scrollbar or window borders. Visually, it features the Hack 14 font on a transparent background (95% opacity) with a custom dark background hex color, a purple cursor, and a specific 16-color ANSI palette. Functional tweaks include a massive 50,000-line scrollback buffer, while various alerts and interface elements like the system bell, unsafe paste dialog, close confirmation, and permanent tab bar are all disabled.
