@@ -55,12 +55,12 @@ This configuration file defines custom keyboard and mouse shortcuts using `xbind
   Launches Flameshot’s GUI for taking and annotating screenshots.
 
 ### Clipboard Manager
-- **Ctrl + Shift + Super + Up** → `copyq show`  
+- **Ctrl + Shift + Super (Mod4) + Up** → `copyq show`  
   Shows the CopyQ clipboard manager window.
 
 ### Window Management
 
-- **Ctrl + Middle Click** → Kill window under mouse  
+- **Ctrl + Mod4 + Middle Click** → Kill window under mouse  
   - Command: `bash -c 'wid=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2); if [ -n "$wid" ]; then wmctrl -i -c "$wid"; fi'`  
   Closes the window currently under the mouse cursor.
 
