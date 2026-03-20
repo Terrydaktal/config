@@ -18,12 +18,12 @@
 "bash -c 'mkdir /tmp/xbind_lock 2>/dev/null || exit 0; wid=$(tail -n 1 /tmp/min_stack); if [ -n \"$wid\" ]; then wmctrl -i -R $wid; sed -i \"\$d\" /tmp/min_stack; fi; sleep 0.3; rmdir /tmp/xbind_lock'"
   m:0x40 + b:4
 
-# Mouse Back -> Fish prevd (Alt + Left)
-"if xdotool getactivewindow getwindowname | grep -i 'terminal'; then xte 'keydown Alt_L' 'key Left' 'keyup Alt_L'; else xdotool click 8; fi"
+# Mouse Back -> Fish prevd in Terminal, standard Back elsewhere
+"if xdotool getactivewindow getwindowname | grep -i 'terminal'; then xte 'keydown Alt_L' 'key Left' 'keyup Alt_L'; else xdotool key XF86Back; fi"
 b:8
 
-# Mouse Forward -> Fish nextd (Alt + Right)
-"if xdotool getactivewindow getwindowname | grep -i 'terminal'; then xte 'keydown Alt_L' 'key Right' 'keyup Alt_L'; else xdotool click 9; fi"
+# Mouse Forward -> Fish nextd in Terminal, standard Forward elsewhere
+"if xdotool getactivewindow getwindowname | grep -i 'terminal'; then xte 'keydown Alt_L' 'key Right' 'keyup Alt_L'; else xdotool key XF86Forward; fi"
 b:9
 
 
@@ -53,7 +53,7 @@ b:9
 
 # Slot 4
 "/home/lewis/.local/bin/launch-slot 4"
-    Control+Mod4 + f
+    Control+Mod4 + f  - `Ctrl + Super + 6` 
 
 # Slot 4
 "/home/lewis/.local/bin/launch-slot 4"
@@ -62,6 +62,10 @@ b:9
 # Slot 5
 "/home/lewis/.local/bin/launch-slot 5"
     Control+Mod4 + g
+
+# Slot 5
+"/home/lewis/.local/bin/launch-slot 5"
+    Control+Mod4 + 5
 
 # Slot 6
 "/home/lewis/.local/bin/launch-slot 6"
