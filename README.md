@@ -7,7 +7,7 @@ config.fish
   - `JAVA_HOME` set to `/usr/lib/jvm/java-21-openjdk-amd64`  
   - `PASSGEN_PEPPER` set to a redacted value (likely for a password generator)  
   - `fish_history_limit` set to `256000` (increases the number of previous commands Fish remembers in its history file)  
-  - `LS_COLORS` and `EZA_COLORS` loaded from `~/.config/fish/ls_colours.value` (defines color schemes for `ls`/`eza`/`f`/`tree`). Comprehensive colour coding of ~700 file extensions and types into different colour groups and typeface styles.  
+  - `LS_COLORS` and `EZA_COLORS` loaded from `~/.config/fish/ls_colours.dircolors` (defines color schemes for `ls`/`eza`/`f`/`tree`). Comprehensive colour coding of ~700 file extensions and types into different colour groups and typeface styles.  
 
 - **Abbreviations**:  
   - **`*`** expands to `{.,}*` (matches both visible and hidden files when using wildcards, e.g., `ls *` shows dotfiles as well).  
@@ -22,7 +22,7 @@ config.fish
   - `mv` → `/home/lewis/.local/bin/copy --move` (custom move script with rsync)
   - `dust` → `dust -d 1` (disk usage tool with depth 1; counts multiple hardlinks as one unless `-s`)  
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
-  - `tree` → `/home/lewis/.local/bin/tree -F -a -L 2 -T 10 --hyperlinks` (custom tree script with file type indicators, all files, max depth 2, limit 10 entries per dir, and hyperlinks)  
+  - `tree` → `/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlinks` (custom tree script with file type indicators, all files, grid layout, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlinks)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
   - `pwd` outputs a hyperlink (clickable path in supported terminals)  
 
@@ -31,6 +31,9 @@ config.fish
   - **`ll` function**: Long listing with human‑readable sizes, git status, and file indicators. If fewer than 1000 files exist and inside a git repo, adds `--git-repos` for better repository grouping. Uses `eza_wrapper`.  
   - **`la` function**: Like `ll` but also shows hidden files (`-A`). Also conditionally adds `--git-repos` for git repos with <1000 files.  
   - **`eza_wrapper` function**: A helper that processes `--sort` arguments to handle `asc`/`desc` modifiers (e.g., `--sort size desc`). It passes the transformed flags to `eza`.  
+  - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.
+  - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `fzf` to pick a directory from `~/.cache/universal-last-dirs`. Otherwise, it uses `zoxide`.
+  - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `fzf` to pick a file from `~/.cache/universal-last-files`.
   - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  
   - **`unexpose` function + abbreviation**: Removes the symlink from `~/.local/bin` (with safety check).  
   - **`sudo` wrapper**: If `sudo rm` is used, it runs the trash script as root instead of plain `rm`; otherwise passes through to normal `sudo`.  

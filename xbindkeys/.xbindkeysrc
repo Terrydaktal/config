@@ -1,7 +1,3 @@
-# Bind print screen to flameshot print screen
-"flameshot gui"
-    Print
-
 # Show CopyQ
 "copyq show"
     Control+Shift+Mod4+Up

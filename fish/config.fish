@@ -1,12 +1,19 @@
-if status is-interactive
-
-    # Environment Variables
-    set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
+# Environment Variables
+if not set -q PASSGEN_PEPPER
     set -gx PASSGEN_PEPPER "REDACTED"
-    set -gx fish_history_limit 256000 
-    set -gx LS_COLORS (cat ~/.config/fish/ls_colours.value)
-    set -gx EZA_COLORS $LS_COLORS
+end
+
+set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
+set -gx LS_COLORS (dircolors -b ~/.config/fish/ls_colours.dircolors | string replace -r "^LS_COLORS='(.*)';\$" '$1')
+set -gx EZA_COLORS $LS_COLORS
     
+if status is-interactive
+    
+    zoxide init fish | source
+    
+    # Interactive Session Environment Variables
+    set -gx fish_history_limit 256000 
+
     #Abbreviations
     abbr --add --position anywhere -- '*' '{.,}*'
 
@@ -20,7 +27,7 @@ if status is-interactive
     alias dust 'dust -d 1' #counts multiple hardlinks as one unless -s
     alias rm '/home/lewis/.local/bin/trash'
     alias cp '/home/lewis/.local/bin/copy'
-    alias tree '/home/lewis/.local/bin/tree -F -a -L 2 -T 10 --hyperlinks'
+    alias tree '/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlinks'
     alias mkdir 'mkdir -p'
     alias pwd='printf "\e]8;;file://%s%s\a%s\e]8;;\a\n" (hostname) (string escape --style=url -- $PWD) "$PWD"'    
 
@@ -29,6 +36,10 @@ if status is-interactive
     function ll; set -l g --git; if test (count *) -lt 1000; and git rev-parse --is-inside-work-tree >/dev/null 2>&1; set -a g --git-repos; end; eza_wrapper eza -lghF $g --group-directories-first --sort=type --hyperlink -- $argv; end
     function la; set -l g --git; if test (count -A *) -lt 1000; and git rev-parse --is-inside-work-tree >/dev/null 2>&1; set -a g --git-repos; end; eza_wrapper eza -lgAhF $g --group-directories-first --sort=type --hyperlink -- $argv; end
     function eza_wrapper; set -l cmd $argv[1]; set -e argv[1]; set -l f; set -l i 1; while test $i -le (count $argv); if test "$argv[$i]" = "--sort"; set -l fd $argv[(math $i + 1)]; set -l or $argv[(math $i + 2)]; if test "$or" = asc; set -a f --sort=$fd; set i (math $i + 3); else if test "$or" = desc; set -a f --sort=$fd -r; set i (math $i + 3); else; set -a f --sort=$fd; set i (math $i + 2); end; else; set -a f "$argv[$i]"; set i (math $i + 1); end; end; command $cmd $f; end
+    function f; command f --cache-raw $argv; end    
+    function cd; if set -q argv[1]; __zoxide_z $argv; else; if test -s ~/.cache/universal-last-dirs; set -l t (cat ~/.cache/universal-last-dirs | fzf --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; else; __zoxide_z ~; end; else; __zoxide_z ~; end; end; end
+    function cdi; __zoxide_zi $argv; end
+    function nano; if set -q argv[1]; command nano $argv; else; set -l t (test -s ~/.cache/universal-last-files; and cat ~/.cache/universal-last-files | fzf --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; end; end
     function expose; set -l target (realpath $argv[1]); set -l name (test (count $argv) -gt 1; and echo $argv[2]; or basename $argv[1]); ln -sf $target ~/.local/bin/$name; echo "Exposed $target as $name"; end; abbr -a expose expose
     function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
     function sudo; test (count $argv) -ge 1; and test "$argv[1]" = "rm"; and command sudo /home/lewis/.local/bin/trash $argv[2..-1]; or command sudo $argv; end
@@ -41,7 +52,6 @@ if status is-interactive
     bind \e\[1\;5A "set -l r (zoxide query -i); if test -n \"\$r\"; if string match -q '* *' \"\$r\"; commandline -i \"'\$r'\"; else; commandline -i \"\$r\"; end; end; commandline -f repaint"
     bind \b smart_ctrl_backspace
    
-    zoxide init fish --cmd cd | source
 end
 
 nvidia-settings -a "[gpu:0]/GPUPowerMizerMode=1" > /dev/null 2>&1
