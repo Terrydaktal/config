@@ -22,7 +22,7 @@ config.fish
   - `mv` → `/home/lewis/.local/bin/copy --move` (custom move script with rsync)
   - `dust` → `dust -d 1` (disk usage tool with depth 1; counts multiple hardlinks as one unless `-s`)  
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
-  - `tree` → `/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlinks` (custom tree script with file type indicators, all files, grid layout, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlinks)  
+  - `tree` → `/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlink` (custom tree script with file type indicators, all files, grid layout, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlink)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
   - `pwd` outputs a hyperlink (clickable path in supported terminals)  
 

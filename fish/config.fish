@@ -27,7 +27,7 @@ if status is-interactive
     alias dust 'dust -d 1' #counts multiple hardlinks as one unless -s
     alias rm '/home/lewis/.local/bin/trash'
     alias cp '/home/lewis/.local/bin/copy'
-    alias tree '/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlinks'
+    alias tree '/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlink'
     alias mkdir 'mkdir -p'
     alias pwd='printf "\e]8;;file://%s%s\a%s\e]8;;\a\n" (hostname) (string escape --style=url -- $PWD) "$PWD"'    
 
