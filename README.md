@@ -32,17 +32,19 @@ config.fish
   - **`la` function**: Like `ll` but also shows hidden files (`-A`). Also conditionally adds `--git-repos` for git repos with <1000 files.  
   - **`eza_wrapper` function**: A helper that processes `--sort` arguments to handle `asc`/`desc` modifiers (e.g., `--sort size desc`). It passes the transformed flags to `eza`.  
   - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.
-  - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `fzf` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. Otherwise, it uses `zoxide`.  
-  - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `fzf` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`.
+  - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `fzf` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `fzf` directory picker. Otherwise, it uses `zoxide`.  
+  - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `fzf` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `fzf` file picker.  
   - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  
   - **`unexpose` function + abbreviation**: Removes the symlink from `~/.local/bin` (with safety check).  
   - **`sudo` wrapper**: If `sudo rm` is used, it runs the trash script as root instead of plain `rm`; otherwise passes through to normal `sudo`.  
   - **`show_timestamp_after_command`** (event: `fish_postexec`): After each command, prints a timestamp (`[DD/MM/YY HH:MM:SS]`) and the command duration in milliseconds, in grey color.  
   - **`clipboard` function**: Copies content to the system clipboard. Works as `cat file | clipboard` (stdin) or `clipboard filename` (reads file). Uses `fish_clipboard_copy` internally.  
   - **`smart_ctrl_backspace` function**: Deletes the word to the left of the cursor (`backward-kill-word`) if the command line is not empty. Used by the Ctrl+Backspace binding.  
+  - **`smart_enter` function**: Bound to Enter. If the command line is empty, it clears the `cd` and `nano` history files in `/tmp`. If not empty, it executes the command as usual.
   - **`__zoxide_auto_report` function** (event: `fish_postexec`): Automatically adds directories to the zoxide database. First adds the current working directory. Then expands the last executed command line into tokens, resolves paths, and adds any existing directories (or parent directories of files) to zoxide, keeping the ranking current.  
 
 - **Key Bindings**:  
+  - **Enter**: If the command line is empty, clears history files for `cd` and `nano` (via `smart_enter`).
   - **Ctrl+Backspace**: If the command line is not empty, deletes the word to the left of the cursor (`backward-kill-word`).  
   - **Ctrl+Up Arrow**: Opens zoxide’s interactive directory picker (fzf‑like). The selected directory is inserted into the command line (quoted if it contains spaces).  
 
