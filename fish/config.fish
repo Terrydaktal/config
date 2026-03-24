@@ -46,7 +46,7 @@ if status is-interactive
     function show_timestamp_after_command --on-event fish_postexec; set_color grey; echo (date "+[%d/%m/%y %H:%M:%S]") "$CMD_DURATION ms elapsed"; set_color normal; end
     function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
     function smart_ctrl_backspace; set -l c (commandline); if test -n "$c"; commandline -f backward-kill-word; end; end
-    function smart_enter; set -l c (commandline); if test -z "$c"; echo -n > /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; echo -n > /tmp/fzf-history-$USER/universal-last-files-$fish_pid; commandline -f repaint; else; commandline -f execute; end; end
+    function smart_enter; set -l c (commandline); if test -z "$c"; echo -n > /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; echo -n > /tmp/fzf-history-$USER/universal-last-files-$fish_pid; echo; commandline -f repaint; else; commandline -f execute; end; end
     functions -e __zoxide_auto_report 2>/dev/null; function __zoxide_auto_report --on-event fish_postexec; zoxide add "$PWD"; for a in (commandline --input="$argv[1]" --tokens-expanded 2>/dev/null); set -l p (path resolve -- "$a" 2>/dev/null); if test -n "$p"; and test -d "$p"; zoxide add "$p"; else if test -n "$p"; and test -e "$p"; zoxide add (path dirname -- "$p"); end; end; end
 
     # Binds
