@@ -26,12 +26,13 @@ config.fish
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
   - `ls` → `twig -AF --hyperlink --cache-raw`
   - `la` → `ls -l`
+  - `which` → `twig -Al -X --hyperlink -F`
   - `pwd` outputs a hyperlink (clickable path in supported terminals)  
 
   - **Custom Functions & Abbreviations**:  
   - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.    - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `fzf` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `fzf` directory picker. Otherwise, it uses `zoxide`.  
   - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `fzf` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `fzf` file picker.  
-  - **`which` function**: Wraps `command -s` and outputs a split hyperlink with `LS_COLORS` applied to the filename. The directory part and the filename part are separate clickable links (e.g., clicking the path opens the folder, clicking the filename opens the file in a supported terminal).    - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  
+  - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  
   - **`unexpose` function + abbreviation**: Removes the symlink from `~/.local/bin` (with safety check).  
   - **`sudo` wrapper**: If `sudo rm` is used, it runs the trash script as root instead of plain `rm`; otherwise passes through to normal `sudo`.  
   - **`show_timestamp_after_command`** (event: `fish_postexec`): After each command, prints a timestamp (`[DD/MM/YY HH:MM:SS]`) and the command duration in milliseconds, in grey color.  
