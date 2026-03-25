@@ -31,11 +31,9 @@ if status is-interactive
     alias mkdir 'mkdir -p'
     alias pwd='printf "\e]8;;file://%s%s\a%s\e]8;;\a\n" (hostname) (string escape --style=url -- $PWD) "$PWD"'    
     alias ls 'twig -AF --hyperlink --cache-raw'
+    alias la 'ls -l'
 
     # Functions
-    function ll; set -l g --git; if test (count *) -lt 1000; and git rev-parse --is-inside-work-tree >/dev/null 2>&1; set -a g --git-repos; end; eza_wrapper eza -lghF $g --group-directories-first --sort=type --hyperlink -- $argv; end
-    function la; set -l g --git; if test (count -A *) -lt 1000; and git rev-parse --is-inside-work-tree >/dev/null 2>&1; set -a g --git-repos; end; eza_wrapper eza -lgAhF $g --group-directories-first --sort=type --hyperlink -- $argv; end
-    function eza_wrapper; set -l cmd $argv[1]; set -e argv[1]; set -l f; set -l i 1; while test $i -le (count $argv); if test "$argv[$i]" = "--sort"; set -l fd $argv[(math $i + 1)]; set -l or $argv[(math $i + 2)]; if test "$or" = asc; set -a f --sort=$fd; set i (math $i + 3); else if test "$or" = desc; set -a f --sort=$fd -r; set i (math $i + 3); else; set -a f --sort=$fd; set i (math $i + 2); end; else; set -a f "$argv[$i]"; set i (math $i + 1); end; end; command $cmd $f; end
     function f; command f --cache-raw $argv; end    
     function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | fzf --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (fzf --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
     function cdi; __zoxide_zi $argv; end

@@ -25,14 +25,11 @@ config.fish
   - `tree` → `/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlink` (custom tree script with file type indicators, all files, grid layout, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlink)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
   - `ls` → `twig -AF --hyperlink --cache-raw`
+  - `la` → `ls -l`
   - `pwd` outputs a hyperlink (clickable path in supported terminals)  
 
-- **Custom Functions & Abbreviations**:  
-  - **`ll` function**: Long listing with human‑readable sizes, git status, and file indicators. If fewer than 1000 files exist and inside a git repo, adds `--git-repos` for better repository grouping. Uses `eza_wrapper`.  
-  - **`la` function**: Like `ll` but also shows hidden files (`-A`). Also conditionally adds `--git-repos` for git repos with <1000 files.  
-  - **`eza_wrapper` function**: A helper that processes `--sort` arguments to handle `asc`/`desc` modifiers (e.g., `--sort size desc`). It passes the transformed flags to `eza`.  
-  - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.
-  - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `fzf` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `fzf` directory picker. Otherwise, it uses `zoxide`.  
+  - **Custom Functions & Abbreviations**:  
+  - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.    - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `fzf` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `fzf` directory picker. Otherwise, it uses `zoxide`.  
   - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `fzf` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `fzf` file picker.  
   - **`which` function**: Wraps `command -s` and outputs a split hyperlink with `LS_COLORS` applied to the filename. The directory part and the filename part are separate clickable links (e.g., clicking the path opens the folder, clicking the filename opens the file in a supported terminal).    - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  
   - **`unexpose` function + abbreviation**: Removes the symlink from `~/.local/bin` (with safety check).  
