@@ -19,4 +19,5 @@
   <property name="misc-cursor-shape" type="string" value="TERMINAL_CURSOR_SHAPE_BLOCK"/>
   <property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>
   <property name="scrolling-lines" type="uint" value="50000"/>
+  <property name="word-chars" type="string" value="-A-Za-z0-9_./?%&amp;#+_~"/>
 </channel>
