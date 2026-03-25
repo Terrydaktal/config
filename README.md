@@ -24,10 +24,10 @@ config.fish
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
   - `tree` → `/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlink` (custom tree script with file type indicators, all files, grid layout, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlink)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
+  - `ls` → `twig -AF --hyperlink --cache-raw`
   - `pwd` outputs a hyperlink (clickable path in supported terminals)  
 
 - **Custom Functions & Abbreviations**:  
-  - **`ls` function**: Replaces the traditional `ls` with `eza`. Calls `eza_wrapper` with `-a` (show all), `--sort=type`, `--group-directories-first`, `-F` (indicators), and `--hyperlink`.  
   - **`ll` function**: Long listing with human‑readable sizes, git status, and file indicators. If fewer than 1000 files exist and inside a git repo, adds `--git-repos` for better repository grouping. Uses `eza_wrapper`.  
   - **`la` function**: Like `ll` but also shows hidden files (`-A`). Also conditionally adds `--git-repos` for git repos with <1000 files.  
   - **`eza_wrapper` function**: A helper that processes `--sort` arguments to handle `asc`/`desc` modifiers (e.g., `--sort size desc`). It passes the transformed flags to `eza`.  

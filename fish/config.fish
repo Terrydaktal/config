@@ -30,9 +30,9 @@ if status is-interactive
     alias tree '/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlink'
     alias mkdir 'mkdir -p'
     alias pwd='printf "\e]8;;file://%s%s\a%s\e]8;;\a\n" (hostname) (string escape --style=url -- $PWD) "$PWD"'    
+    alias ls 'twig -AF --hyperlink --cache-raw'
 
     # Functions
-    function ls; eza_wrapper eza -a --sort=type --group-directories-first -F --hyperlink -- $argv; end
     function ll; set -l g --git; if test (count *) -lt 1000; and git rev-parse --is-inside-work-tree >/dev/null 2>&1; set -a g --git-repos; end; eza_wrapper eza -lghF $g --group-directories-first --sort=type --hyperlink -- $argv; end
     function la; set -l g --git; if test (count -A *) -lt 1000; and git rev-parse --is-inside-work-tree >/dev/null 2>&1; set -a g --git-repos; end; eza_wrapper eza -lgAhF $g --group-directories-first --sort=type --hyperlink -- $argv; end
     function eza_wrapper; set -l cmd $argv[1]; set -e argv[1]; set -l f; set -l i 1; while test $i -le (count $argv); if test "$argv[$i]" = "--sort"; set -l fd $argv[(math $i + 1)]; set -l or $argv[(math $i + 2)]; if test "$or" = asc; set -a f --sort=$fd; set i (math $i + 3); else if test "$or" = desc; set -a f --sort=$fd -r; set i (math $i + 3); else; set -a f --sort=$fd; set i (math $i + 2); end; else; set -a f "$argv[$i]"; set i (math $i + 1); end; end; command $cmd $f; end
