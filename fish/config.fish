@@ -52,10 +52,10 @@ if status is-interactive
         set -l search_cmd
         if string match -rq '^cd(\s+|$)' "$c"
             set file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid
-            set search_cmd "unearth \"*\" -d -H --color=never"
+            set search_cmd "unearth \"*\" -d -H --color=never ~"
         else
             set file /tmp/fzf-history-$USER/universal-last-files-$fish_pid
-            set search_cmd "unearth \"*\" -f -H --color=never"
+            set search_cmd "unearth \"*\" -f -H --color=never ~"
         end
         set -l r
         if test -s $file
