@@ -64,13 +64,16 @@ if status is-interactive
         if string match -rq '^cd(\s+|$)' "$c"
             set file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid
             set search_cmd "unearth \"*\" -d -H --color=never $search_dir"
-        else
+        else if string match -rq '^(nano|cat)(\s+|$)' "$c"
             set file /tmp/fzf-history-$USER/universal-last-files-$fish_pid
             set search_cmd "unearth \"*\" -f -H --color=never $search_dir"
+        else
+            set file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid /tmp/fzf-history-$USER/universal-last-files-$fish_pid
+            set search_cmd "unearth \"*\" -H --color=never $search_dir"
         end
         set -l r
-        if test -s $file
-            set r (cat $file | fzf --height 40% --reverse --header="Select path")
+        if test -n "$file"; and test -s $file[1]; or test -s $file[2]
+            set r (cat $file 2>/dev/null | fzf --height 40% --reverse --header="Select path")
         else
             set r (eval $search_cmd | fzf --height 40% --reverse --header="Select path")
         end
