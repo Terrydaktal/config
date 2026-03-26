@@ -32,9 +32,10 @@ if status is-interactive
     alias pwd='printf "\e]8;;file://%s%s\a%s\e]8;;\a\n" (hostname) (string escape --style=url -- $PWD) "$PWD"'    
     alias ls 'twig -AFU --cache-raw'
     alias la 'ls -l'
+    alias tile 'tile_windows 3' 
 
     # Functions
-    function f; unearth --cache-raw -H --color=always -F $argv; end    
+    function f; unearth -FH --color=always --hyperlink --cache-raw -F $argv; end    
     function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | fzf --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (fzf --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
     function cdi; __zoxide_zi $argv; end
     function nano; if set -q argv[1]; command nano $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-files-$fish_pid; if test -s $file; set -l t (cat $file | fzf --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; else; set -l t (fzf --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; end; end; end
@@ -50,12 +51,22 @@ if status is-interactive
         set -l c (commandline)
         set -l file
         set -l search_cmd
+        set -l search_dir "~"
+        set -l parts (string split ' ' -- "$c")
+        if test (count $parts) -gt 1
+            set -l last (path resolve -- $parts[-1] 2>/dev/null)
+            if test -d "$last"
+                set search_dir "$last"
+            else if test -d (dirname -- "$last" 2>/dev/null)
+                set search_dir (dirname -- "$last")
+            end
+        end
         if string match -rq '^cd(\s+|$)' "$c"
             set file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid
-            set search_cmd "unearth \"*\" -d -H --color=never ~"
+            set search_cmd "unearth \"*\" -d -H --color=never $search_dir"
         else
             set file /tmp/fzf-history-$USER/universal-last-files-$fish_pid
-            set search_cmd "unearth \"*\" -f -H --color=never ~"
+            set search_cmd "unearth \"*\" -f -H --color=never $search_dir"
         end
         set -l r
         if test -s $file
