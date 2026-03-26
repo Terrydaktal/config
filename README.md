@@ -42,7 +42,7 @@ config.fish
 - **Key Bindings**:  
   - **Enter**: If the command line is empty, clears files in `/tmp/fzf-history-$USER` (via `smart_enter`).
   - **Ctrl+Backspace**: If the command line is not empty, deletes the word to the left of the cursor (`backward-kill-word`).  
-  - **Ctrl+Up Arrow**: Opens a directory picker. It first tries to search the shell's directory history file in `/tmp/fzf-history-$USER`. If that file is empty, it falls back to a general directory search using `unearth "*" -H --color=never | fzf`. Selected paths are inserted into the command line (quoted if they contain spaces).  
+  - **Ctrl+Up Arrow**: Opens a context-aware picker. If the command line starts with `cd`, it searches directory history in `/tmp/fzf-history-$USER` or falls back to `unearth "*" -d` for a general directory search. Otherwise, it searches file history or falls back to `unearth "*" -f` for a general file search.  
 
 - **zoxide Integration**: Replaces `cd` with `zoxide z` (smart directory jumping). Also provides `cdi` for `zi` (fuzzy interactive selection).  
 
