@@ -34,11 +34,11 @@ if status is-interactive
     alias la 'ls -l'
 
     # Functions
-    function f; command f --cache-raw $argv; end    
+    function f; unearth --cache-raw -H --color=always -F $argv; end    
     function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | fzf --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (fzf --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
     function cdi; __zoxide_zi $argv; end
     function nano; if set -q argv[1]; command nano $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-files-$fish_pid; if test -s $file; set -l t (cat $file | fzf --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; else; set -l t (fzf --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; end; end; end
-    function which; for p in (command -s $argv); twig -LxXUF $p; if test -L $p; set -l l_meta (twig -psot -L $p | string replace -r ' \S+(@|/|=>|\||\*)?$' ''); set -l t (realpath $p); set -l t_meta (twig -psot -L $t | string replace -r ' \S+(@|/|=>|\||\*)?$' ''); echo "$l_meta  -> $t_meta"; else; twig -psot -L $p; end; end; end
+    function which; for p in (command -s $argv); twig -LxXUF $p; if test -L $p; set -l l_meta (twig -psot -L $p | string replace -r ' \S+(@|/|=>|\||\*)?$' ''); set -l t (realpath $p); set -l t_meta (twig -psot -L $t | string replace -r ' \S+(@|/|=>|\||\*)?$' ''); echo "$l_meta -> $t_meta"; else; twig -psot -L $p; end; end; end
     function expose; set -l target (realpath $argv[1]); set -l name (test (count $argv) -gt 1; and echo $argv[2]; or basename $argv[1]); ln -sf $target ~/.local/bin/$name; echo "Exposed $target as $name"; end; abbr -a expose expose
     function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
     function sudo; test (count $argv) -ge 1; and test "$argv[1]" = "rm"; and command sudo /home/lewis/.local/bin/trash $argv[2..-1]; or command sudo $argv; end
@@ -49,7 +49,7 @@ if status is-interactive
     functions -e __zoxide_auto_report 2>/dev/null; function __zoxide_auto_report --on-event fish_postexec; zoxide add "$PWD"; for a in (commandline --input="$argv[1]" --tokens-expanded 2>/dev/null); set -l p (path resolve -- "$a" 2>/dev/null); if test -n "$p"; and test -d "$p"; zoxide add "$p"; else if test -n "$p"; and test -e "$p"; zoxide add (path dirname -- "$p"); end; end; end
 
     # Binds
-    bind \e\[1\;5A "set -l r (zoxide query -i); if test -n \"\$r\"; if string match -q '* *' \"\$r\"; commandline -i \"'\$r'\"; else; commandline -i \"\$r\"; end; end; commandline -f repaint"
+    bind \e\[1\;5A "set -l file /tmp/fzf-history-\$USER/universal-last-dirs-\$fish_pid; set -l r; if test -s \$file; set r (cat \$file | fzf --height 40% --reverse --header=\"Select path\"); else; set r (unearth -H --color=never | fzf --height 40% --reverse --header=\"Select path\"); end; if test -n \"\$r\"; if string match -q '* *' \"\$r\"; commandline -i \"'\$r'\"; else; commandline -i \"\$r\"; end; end; commandline -f repaint"
     bind \b smart_ctrl_backspace
     bind \r smart_enter
    
