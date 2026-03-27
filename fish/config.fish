@@ -36,9 +36,10 @@ if status is-interactive
 
     # Functions
     function f; unearth -FH --color=always --hyperlink --cache-raw -F $argv; end    
-    function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | fzf --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (fzf --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
+    function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | friz --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (friz --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
+
     function cdi; __zoxide_zi $argv; end
-    function nano; if set -q argv[1]; command nano $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-files-$fish_pid; if test -s $file; set -l t (cat $file | fzf --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; else; set -l t (fzf --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; end; end; end
+    function nano; if set -q argv[1]; command nano $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-files-$fish_pid; if test -s $file; set -l t (cat $file | friz --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; else; set -l t (friz --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; end; end; end
     function which; for p in (command -s $argv); if test -L $p; twig -LxXUF $p; set -l l_meta (twig -psot -L $p | string replace -r ' \S+(@|/|=>|\||\*)?$' ''); set -l t (realpath $p); set -l t_meta (twig -psot -L $t | string replace -r ' \S+(@|/|=>|\||\*)?$' ''); echo "$l_meta  -> $t_meta"; else; twig -psot -XUF -L $p; end; end; end
     function expose; set -l target (realpath $argv[1]); set -l name (test (count $argv) -gt 1; and echo $argv[2]; or basename $argv[1]); ln -sf $target ~/.local/bin/$name; echo "Exposed $target as $name"; end; abbr -a expose expose
     function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
@@ -46,53 +47,20 @@ if status is-interactive
     function show_timestamp_after_command --on-event fish_postexec; set_color grey; echo (date "+[%d/%m/%y %H:%M:%S]") "$CMD_DURATION ms elapsed"; set_color normal; end
     function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
     function smart_ctrl_backspace; set -l c (commandline); if test -n "$c"; commandline -f backward-kill-word; end; end
-    function smart_enter; set -l c (commandline); if test -z "$c"; echo -n > /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; echo -n > /tmp/fzf-history-$USER/universal-last-files-$fish_pid; echo; commandline -f repaint; else; commandline -f execute; end; end
-    function smart_ctrl_up
-        set -l c (commandline)
-        set -l file
-        set -l search_cmd
-        set -l search_dir "~"
-        set -l parts (string split ' ' -- "$c")
-        if test (count $parts) -gt 1
-            set -l last (path resolve -- $parts[-1] 2>/dev/null)
-            if test -d "$last"
-                set search_dir "$last"
-            else if test -d (dirname -- "$last" 2>/dev/null)
-                set search_dir (dirname -- "$last")
-            end
-        end
-        if string match -rq '^cd(\s+|$)' "$c"
-            set file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid
-            set search_cmd "unearth \"*\" -d -H --color=never $search_dir"
-        else if string match -rq '^(nano|cat)(\s+|$)' "$c"
-            set file /tmp/fzf-history-$USER/universal-last-files-$fish_pid
-            set search_cmd "unearth \"*\" -f -H --color=never $search_dir"
-        else
-            set file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid /tmp/fzf-history-$USER/universal-last-files-$fish_pid
-            set search_cmd "unearth \"*\" -H --color=never $search_dir"
-        end
-        set -l r
-        if test -n "$file"; and test -s $file[1]; or test -s $file[2]
-            set r (cat $file 2>/dev/null | fzf --height 40% --reverse --header="Select path")
-        else
-            set r (eval $search_cmd | fzf --height 40% --reverse --header="Select path")
-        end
-        if test -n "$r"
-            if string match -q '* *' "$r"
-                commandline -i "'$r'"
-            else
-                commandline -i "$r"
-            end
-        end
-        commandline -f repaint
-    end
+    function smart_ctrl_up; set -l c (commandline); set -l search_dir ~; set -l picker friz; set -l parts (string split ' ' -- "$c"); if set -q parts[2]; if test -d "$parts[-1]"; set search_dir "$parts[-1]"; end; end; switch "$c"; case 'cd*'; set files /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; set search_cmd unearth "*" -d -H --color=never "$search_dir"; case 'nano*' 'cat*'; set files /tmp/fzf-history-$USER/universal-last-files-$fish_pid; set search_cmd unearth "*" -f -H --color=never "$search_dir"; case '*'; set files /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid /tmp/fzf-history-$USER/universal-last-files-$fish_pid; set search_cmd unearth "*" -H --color=never "$search_dir"; end; set -l r; if test -s "$files[1]"; or test -s "$files[2]"; set r (cat $files 2>/dev/null | $picker --height 40% --reverse --header="Select path"); else; set r ($search_cmd | $picker --height 40% --reverse --header="Select path"); end; if test -n "$r"; commandline -i (string escape -- "$r"); end; commandline -f repaint; end
     functions -e __zoxide_auto_report 2>/dev/null; function __zoxide_auto_report --on-event fish_postexec; zoxide add "$PWD"; for a in (commandline --input="$argv[1]" --tokens-expanded 2>/dev/null); set -l p (path resolve -- "$a" 2>/dev/null); if test -n "$p"; and test -d "$p"; zoxide add "$p"; else if test -n "$p"; and test -e "$p"; zoxide add (path dirname -- "$p"); end; end; end
+    function smart_enter; set -l buf (string trim -- (commandline -b)); if test -z "$buf"; echo -n > /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; echo -n > /tmp/fzf-history-$USER/universal-last-files-$fish_pid; echo; commandline -f repaint; return; end; commandline -f execute; end
+    function xfce_click_handler; set -l marker "__XFCE_CLICK__:"; set -l buf (string trim -- (commandline -b)); if not string match -q "*$marker*" -- "$buf"; commandline -f repaint; return; end; set -l clicked (string replace -r "^.*$marker" "" "$buf"); set clicked (string trim -- "$clicked"); set clicked (string replace -a '\x1f' '' "$clicked"); set clicked (string replace -r '[[:cntrl:]]+' '' "$clicked"); set clicked (string replace -r '^--[[:space:]]+' "" "$clicked"); if test -d "$clicked"; __zoxide_cd -- "$clicked"; commandline -r -- ""; commandline -f repaint; return; end; set -l cleaned (string replace -a $marker "" "$buf"); set cleaned (string replace -a '\x1f' '' "$cleaned"); set cleaned (string replace -r '[[:cntrl:]]+' '' "$cleaned"); set cleaned (string replace -r '^--[[:space:]]+' "" "$cleaned"); commandline -r -- (string trim -- "$cleaned"); commandline -f repaint; end
 
     # Binds
+    bind --erase \r
+    bind -M insert \r smart_enter
+    bind -M default \r smart_enter
+    bind -M insert \x1f xfce_click_handler
+    bind -M default \x1f xfce_click_handler
     bind \e\[1\;5A smart_ctrl_up
     bind \b smart_ctrl_backspace
-    bind \r smart_enter
-   
+
 end
 
 nvidia-settings -a "[gpu:0]/GPUPowerMizerMode=1" > /dev/null 2>&1

@@ -1,6 +1,12 @@
 config.fish
 -----
 
+- **Recent Updates (2026-03-27)**:
+  - Fish functions are now kept in one-line definitions for compact maintenance in `fish/config.fish`.
+  - `xfce_click_handler` now sanitizes click payloads (including literal `\x1f` and control bytes) before path handling.
+  - XFCE directory-click navigation now uses `__zoxide_cd` so terminal back/forward (`Alt+Left`/`Alt+Right`) history is preserved.
+  - Picker cache paths used by `cd`, `nano`, `smart_enter`, and `smart_ctrl_up` are `/tmp/fzf-history-$USER/...`.
+
 - **Interactive Shell Detection**: The configuration inside `if status is-interactive` only applies when the shell is in interactive mode (not for scripts).  
 
 - **Environment Variables**:  
@@ -29,7 +35,7 @@ config.fish
   - `pwd` outputs a hyperlink (clickable path in supported terminals)  
 
   - **Custom Functions & Abbreviations**:  
-  - **`which` function**: Wraps `command -s` and uses `twig` to display the absolute path with detailed metadata. If it's a symlink, it shows path information followed by metadata for both the link and its target side-by-side.    - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.    - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `fzf` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `fzf` directory picker. Otherwise, it uses `zoxide`.    - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `fzf` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `fzf` file picker.  
+  - **`which` function**: Wraps `command -s` and uses `twig` to display the absolute path with detailed metadata. If it's a symlink, it shows path information followed by metadata for both the link and its target side-by-side.    - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.    - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `friz` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `friz` directory picker. Otherwise, it uses `zoxide`.    - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `friz` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `friz` file picker.  
   - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  
   - **`unexpose` function + abbreviation**: Removes the symlink from `~/.local/bin` (with safety check).  
   - **`sudo` wrapper**: If `sudo rm` is used, it runs the trash script as root instead of plain `rm`; otherwise passes through to normal `sudo`.  
@@ -43,6 +49,7 @@ config.fish
   - **Enter**: If the command line is empty, clears files in `/tmp/fzf-history-$USER` (via `smart_enter`).
   - **Ctrl+Backspace**: If the command line is not empty, deletes the word to the left of the cursor (`backward-kill-word`).  
   - **Ctrl+Up Arrow**: Opens a context-aware picker. If the command starts with `cd`, it searches directory history and general directories. If it starts with `nano` or `cat`, it searches file history and general files. For other commands, it searches both directory and file history/locations. It intelligently detects any path already typed as the search root.  
+  - **`Ctrl+_` (`\x1f`)**: Runs `xfce_click_handler`, strips XFCE click markers/control bytes, and jumps directly with `__zoxide_cd` so directory back/forward history stays usable.  
 
 - **zoxide Integration**: Replaces `cd` with `zoxide z` (smart directory jumping). Also provides `cdi` for `zi` (fuzzy interactive selection).  
 
