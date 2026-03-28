@@ -29,7 +29,7 @@ config.fish
   - `pwd` outputs a hyperlink (clickable path in supported terminals)  
 
   - **Custom Functions & Abbreviations**:  
-  - **`which` function**: Wraps `command -s` and uses `twig` to display the absolute path with detailed metadata. If it's a symlink, it shows path information followed by metadata for both the link and its target side-by-side.
+  - **`which` function**: Wraps `command -s` and uses `twig` to display command paths. For symlinks, it prints the resolved link path first, then a single combined metadata line (`link -> target`) using Twig-native colors (captured via PTY so color is preserved).
   - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.
   - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `friz` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `friz` directory picker. Otherwise, it uses `zoxide`.
   - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `friz` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `friz` file picker.  
