@@ -24,20 +24,19 @@ if status is-interactive
 
     # Aliases
     alias mv '/home/lewis/.local/bin/copy --move'
-    alias dust 'dust -d 1' #counts multiple hardlinks as one unless -s
     alias rm '/home/lewis/.local/bin/trash'
     alias cp '/home/lewis/.local/bin/copy'
-    alias tree '/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlink'
-    alias mkdir 'mkdir -p'
-    alias pwd='printf "\e]8;;file://%s%s\a%s\e]8;;\a\n" (hostname) (string escape --style=url -- $PWD) "$PWD"'    
+    alias tree '/home/lewis/.local/bin/tree -FaG -L 3 -T 10 --cache-raw --hyperlink'
+    alias mkdir 'mkdir -p'   
     alias ls 'twig -AFU --cache-raw'
     alias la 'ls -l'
+    alias pwd 'ls -ld'
+    alias dust 'ls -Sa --sort size --reverse'
     alias tile 'tile_windows 3' 
 
     # Functions
     function f; unearth -CH --color=always --hyperlink --cache-raw $argv; end    
     function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | friz --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (friz --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
-
     function cdi; __zoxide_zi $argv; end
     function nano; if set -q argv[1]; command nano $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-files-$fish_pid; if test -s $file; set -l t (cat $file | friz --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; else; set -l t (friz --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; end; end; end
     function which; for p in (command -s $argv); if test -L $p; set -l t (realpath $p); twig --color always -LxXUF $p; set -l l_meta (script -qfc "twig -psot -L '$p'" /dev/null | tr -d '\r' | awk '{$NF=""; sub(/[[:space:]]+$/, ""); print}'); set -l t_meta (script -qfc "twig -psot -L '$t'" /dev/null | tr -d '\r' | awk '{$NF=""; sub(/[[:space:]]+$/, ""); print}'); echo "$l_meta -> $t_meta"; else; twig --color always -psot -XUF -L $p; end; end; end

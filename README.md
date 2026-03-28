@@ -20,13 +20,13 @@ config.fish
 - **Aliases**:  
   - `cp` → `/home/lewis/.local/bin/copy` (custom copy script with rsync)
   - `mv` → `/home/lewis/.local/bin/copy --move` (custom move script with rsync)
-  - `dust` → `dust -d 1` (disk usage tool with depth 1; counts multiple hardlinks as one unless `-s`)  
+  - `dust` → `ls -Sa --sort size --reverse` (lists entries sorted by size, smallest to largest)  
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
-  - `tree` → `/home/lewis/.local/bin/tree -F -a -G -L 3 -T 10 --cache-raw --hyperlink` (custom tree script with file type indicators, all files, grid layout, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlink)  
+  - `tree` → `/home/lewis/.local/bin/tree -FaG -L 3 -T 10 --cache-raw --hyperlink` (custom tree script with all files, git info, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlink)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
-  - `ls` → `twig -AF --hyperlink --cache-raw`
+  - `ls` → `twig -AFU --cache-raw`
   - `la` → `ls -l`
-  - `pwd` outputs a hyperlink (clickable path in supported terminals)  
+  - `pwd` → `ls -ld`  
 
   - **Custom Functions & Abbreviations**:  
   - **`which` function**: Wraps `command -s` and uses `twig` to display command paths. For symlinks, it prints the resolved link path first, then a single combined metadata line (`link -> target`) using Twig-native colors (captured via PTY so color is preserved).
