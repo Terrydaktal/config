@@ -30,7 +30,7 @@ config.fish
 
   - **Custom Functions & Abbreviations**:  
   - **`which` function**: Wraps `command -s` and uses `twig` to display command paths. For symlinks, it prints the resolved link path first, then a single combined metadata line (`link -> target`) using Twig-native colors (captured via PTY so color is preserved).
-  - **`f` function**: Wraps the `f` command with `--cache-raw` enabled.
+  - **`f` function**: Wraps `unearth` with `-CH --color=always --hyperlink --cache-raw`, passing through any provided arguments.
   - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `friz` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `friz` directory picker. Otherwise, it uses `zoxide`.
   - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `friz` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `friz` file picker.  
   - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  

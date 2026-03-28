@@ -35,7 +35,7 @@ if status is-interactive
     alias tile 'tile_windows 3' 
 
     # Functions
-    function f; unearth -FH --color=always --hyperlink --cache-raw -F $argv; end    
+    function f; unearth -CH --color=always --hyperlink --cache-raw $argv; end    
     function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | friz --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (friz --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
 
     function cdi; __zoxide_zi $argv; end
