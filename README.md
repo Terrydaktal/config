@@ -22,31 +22,33 @@ config.fish
   - `mv` → `/home/lewis/.local/bin/copy --move` (custom move script with rsync)
   - `dust` → `ls -Sa --sort size --reverse` (lists entries sorted by size, smallest to largest)  
   - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
-  - `tree` → `/home/lewis/.local/bin/tree -FaG -L 3 -T 10 --cache-raw --hyperlink` (custom tree script with all files, git info, max depth 3, limit 10 entries per dir, cache-raw enabled, and hyperlink)  
+  - `tree` → `/home/lewis/.local/bin/tree -FaG -L 2 -T 10 --hyperlink` (custom tree script with all files, git info, max depth 2, limit 10 entries per dir, and hyperlink)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
-  - `ls` → `twig -AFU --cache-raw`
+  - `ls` → `twig -AFU`
   - `la` → `ls -l`
-  - `pwd` → `ls -ld`  
+  - `pwd` → `ls -ldX`  
+  - `lt` → `tree`  
 
   - **Custom Functions & Abbreviations**:  
   - **`which` function**: Wraps `command -s` and uses `twig` to display command paths. For symlinks, it prints the resolved link path first, then a single combined metadata line (`link -> target`) using Twig-native colors (captured via PTY so color is preserved).
-  - **`f` function**: Wraps `unearth` with `-CH --color=always --hyperlink --cache-raw`, passing through any provided arguments.
+  - **`f` function**: Wraps `unearth` with `-CH -F --color=always --hyperlink`, passing through any provided arguments.
   - **`cd` function**: Replaces the default `cd`. If no argument is provided, it attempts to use `friz` to pick a directory from `/tmp/fzf-history-$USER/universal-last-dirs-<pid>`. If that history file is empty, it opens a general `friz` directory picker. Otherwise, it uses `zoxide`.
   - **`nano` function**: Replaces the default `nano`. If no argument is provided, it attempts to use `friz` to pick a file from `/tmp/fzf-history-$USER/universal-last-files-<pid>`. If that history file is empty, it opens a general `friz` file picker.  
   - **`expose` function + abbreviation**: Creates a symlink in `~/.local/bin` pointing to the real path of a given file, making it accessible from anywhere. Second parameter can rename the link.  
   - **`unexpose` function + abbreviation**: Removes the symlink from `~/.local/bin` (with safety check).  
   - **`sudo` wrapper**: If `sudo rm` is used, it runs the trash script as root instead of plain `rm`; otherwise passes through to normal `sudo`.  
-  - **`show_timestamp_after_command`** (event: `fish_postexec`): After each command, prints a timestamp (`[DD/MM/YY HH:MM:SS]`) and the command duration in milliseconds, in grey color.  
+  - **`show_timestamp_after_command`** (event: `fish_postexec`): After each command, prints a timestamp (`[DD/MM/YY HH:MM:SS]`) and command duration derived from `CMD_DURATION_NS` (milliseconds with microsecond precision), in grey color.  
   - **`clipboard` function**: Copies content to the system clipboard. Works as `cat file | clipboard` (stdin) or `clipboard filename` (reads file). Uses `fish_clipboard_copy` internally.  
   - **`smart_ctrl_backspace` function**: Deletes the word to the left of the cursor (`backward-kill-word`) if the command line is not empty. Used by the Ctrl+Backspace binding.  
-  - **`smart_enter` function**: Bound to Enter. If the command line is empty, it clears the files in `/tmp/fzf-history-$USER`. If not empty, it executes the command as usual.
+  - **`smart_enter` function**: Bound to Enter. Executes the current command line.
+  - **`codex` function**: Wrapper that runs `command codex $argv`.
   - **`__zoxide_auto_report` function** (event: `fish_postexec`): Automatically adds directories to the zoxide database. First adds the current working directory. Then expands the last executed command line into tokens, resolves paths, and adds any existing directories (or parent directories of files) to zoxide, keeping the ranking current.  
 
 - **Key Bindings**:  
-  - **Enter**: If the command line is empty, clears files in `/tmp/fzf-history-$USER` (via `smart_enter`).
+  - **Enter**: Executes the current command line (via `smart_enter`).
   - **Ctrl+Backspace**: If the command line is not empty, deletes the word to the left of the cursor (`backward-kill-word`).  
-  - **Ctrl+Up Arrow**: Opens a context-aware picker. If the command starts with `cd`, it searches directory history and general directories. If it starts with `nano` or `cat`, it searches file history and general files. For other commands, it searches both directory and file history/locations. It intelligently detects any path already typed as the search root.  
-  - **`Ctrl+_` (`\x1f`)**: Runs `xfce_click_handler`, strips XFCE click markers/control bytes, and jumps directly with `__zoxide_cd` so directory back/forward history stays usable.  
+  - **Ctrl+Up Arrow**: Opens a context-aware picker from `unearth` results rooted at the current working directory by default. If the current token is a directory/path (including `~` expansion), it uses that token/parent as the search root and replaces that token with the selected path.  
+  - **`Ctrl+_` (`\x1f`)**: Runs `xfce_click_handler`, strips XFCE click markers/control bytes, and only changes directory when the buffer contains just the click payload; otherwise it pastes the cleaned full path into the existing commandline.  
 
 - **zoxide Integration**: Replaces `cd` with `zoxide z` (smart directory jumping). Also provides `cdi` for `zi` (fuzzy interactive selection).  
 
