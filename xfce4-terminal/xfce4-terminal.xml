@@ -1,12 +1,12 @@
 <?xml version="1.1" encoding="UTF-8"?>
 
 <channel name="xfce4-terminal" version="1.0">
-  <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_TRANSPARENT"/>
-  <property name="background-darkness" type="double" value="0.94999999999999996"/>
-  <property name="color-background" type="string" value="#24241f1f3131"/>
-  <property name="color-cursor" type="string" value="#867f81c281c2"/>
-  <property name="color-palette" type="string" value="rgb(0,0,0);rgb(204,0,0);rgb(78,154,6);rgb(196,160,0);rgb(52,101,164);rgb(117,80,123);rgb(6,152,154);rgb(211,215,207);rgb(85,87,83);rgb(239,41,41);rgb(138,226,52);rgb(252,233,79);rgb(115,159,207);rgb(173,127,168);rgb(52,226,226);rgb(238,238,236)"/>
-  <property name="font-name" type="string" value="Hack 14"/>
+  <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_SOLID"/>
+  <property name="background-darkness" type="double" value="1"/>
+  <property name="color-background" type="string" value="#000000000000"/>
+  <property name="color-cursor" type="string" value=""/>
+  <property name="color-palette" type="string" value="#000000;#aa0000;#00aa00;#aa5500;#0000aa;#aa00aa;#00aaaa;#aaaaaa;#555555;#ff5555;#55ff55;#ffff55;#5555ff;#ff55ff;#55ffff;#ffffff"/>
+  <property name="font-name" type="string" value="Hack Tight 12"/>
   <property name="misc-always-show-tabs" type="bool" value="false"/>
   <property name="misc-bell" type="bool" value="false"/>
   <property name="misc-borders-default" type="bool" value="true"/>
@@ -20,4 +20,31 @@
   <property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>
   <property name="scrolling-lines" type="uint" value="50000"/>
   <property name="word-chars" type="string" value="-A-Za-z0-9_./?%&amp;#+_~"/>
+  <property name="misc-hyperlinks-enabled" type="bool" value="true"/>
+  <property name="misc-hyperlink-insert-button" type="uint" value="1"/>
+  <property name="misc-hyperlink-insert-modifier" type="uint" value="5"/>
+  <property name="misc-hyperlink-insert-middle-click" type="bool" value="true"/>
+  <property name="misc-hyperlink-open-button" type="uint" value="1"/>
+  <property name="misc-hyperlink-open-modifier" type="uint" value="4"/>
+  <property name="misc-middle-click-opens-uri" type="bool" value="false"/>
+  <property name="misc-hyperlink-directory-prefix" type="string" value="__XFCE_CLICK__:"/>
+  <property name="misc-hyperlink-directory-suffix" type="string" value="&#x1f;"/>
+  <property name="cell-width-scale" type="double" value="1"/>
+  <property name="cell-height-scale" type="double" value="1"/>
+  <property name="misc-default-geometry" type="string" value="80x24"/>
+  <property name="font-allow-bold" type="bool" value="true"/>
+  <property name="font-use-system" type="bool" value="false"/>
+  <property name="misc-slim-tabs" type="bool" value="true"/>
+  <property name="color-foreground" type="string" value="#ffffffffffff"/>
+  <property name="color-bold-is-bright" type="bool" value="true"/>
+  <property name="color-cursor-use-default" type="bool" value="true"/>
+  <property name="color-selection-use-default" type="bool" value="true"/>
+  <property name="color-bold-use-default" type="bool" value="true"/>
+  <property name="color-use-theme" type="bool" value="false"/>
+  <property name="color-background-vary" type="bool" value="false"/>
+  <property name="color-cursor-foreground" type="string" value=""/>
+  <property name="color-selection" type="string" value=""/>
+  <property name="color-selection-background" type="string" value=""/>
+  <property name="color-bold" type="string" value=""/>
+  <property name="tab-activity-color" type="string" value="#aa0000"/>
 </channel>
