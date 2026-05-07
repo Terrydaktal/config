@@ -18,11 +18,11 @@ config.fish
   - Conditionally adds `$JAVA_HOME/bin` if the directory exists  
 
 - **Aliases**:  
-  - `cp` → `/home/lewis/.local/bin/copy` (custom copy script with rsync)
-  - `mv` → `/home/lewis/.local/bin/copy --move` (custom move script with rsync)
+  - `cp` → `~/.local/bin/copy` (custom copy script with rsync)
+  - `mv` → `~/.local/bin/copy --move` (custom move script with rsync)
   - `dust` → `ls -Sa --sort size --reverse` (lists entries sorted by size, smallest to largest)  
-  - `rm` → `/home/lewis/.local/bin/trash` (moves files to trash instead of permanent deletion)  
-  - `tree` → `/home/lewis/.local/bin/tree -FaG -L 2 -T 10 --hyperlink` (custom tree script with all files, git info, max depth 2, limit 10 entries per dir, and hyperlink)  
+  - `rm` → `~/.local/bin/trash` (moves files to trash instead of permanent deletion)  
+  - `tree` → `~/.local/bin/tree -FaG -L 2 -T 10 --hyperlink` (custom tree script with all files, git info, max depth 2, limit 10 entries per dir, and hyperlink)  
   - `mkdir` → `mkdir -p` (create parent directories as needed)  
   - `ls` → `twig -AFU`
   - `la` → `ls -l`
@@ -105,7 +105,7 @@ This configuration file defines custom keyboard and mouse shortcuts using `xbind
 
 ### Application Launcher Slots
 
-The script `/home/lewis/.local/bin/launch-slot` is used to launch a fresh new application in the specified taskbar slot. Each slot can be triggered by one or two key combinations. For slot 1 it is `Ctrl + Mod4 + 1`
+The script `~/.local/bin/launch-slot` is used to launch a fresh new application in the specified taskbar slot. Each slot can be triggered by one or two key combinations. For slot 1 it is `Ctrl + Mod4 + 1`
 
 *Note: Multiple number keys are bound to Slot 5; this may be intentional or a placeholder for additional slots.*
 

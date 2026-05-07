@@ -23,10 +23,10 @@ if status is-interactive
     test -d "$JAVA_HOME/bin"; and fish_add_path "$JAVA_HOME/bin"
 
     # Aliases
-    alias mv '/home/lewis/.local/bin/copy --move'
-    alias rm '/home/lewis/.local/bin/trash'
-    alias cp '/home/lewis/.local/bin/copy'
-    alias tree '/home/lewis/.local/bin/tree -FaG -L 2 -T 10 --hyperlink'
+    alias mv '~/.local/bin/copy --move'
+    alias rm '~/.local/bin/trash'
+    alias cp '~/.local/bin/copy'
+    alias tree '~/.local/bin/tree -FaG -L 2 -T 10 --hyperlink=auto --color=auto'
     alias mkdir 'mkdir -p'   
     alias ls 'twig -AFU'
     alias la 'ls -l'
@@ -43,8 +43,9 @@ if status is-interactive
     function which; for p in (command -s $argv); if test -L $p; set -l t (realpath $p); twig --color always -LxXUF $p; set -l l_meta (script -qfc "twig -psot -L '$p'" /dev/null | tr -d '\r' | awk '{$NF=""; sub(/[[:space:]]+$/, ""); print}'); set -l t_meta (script -qfc "twig -psot -L '$t'" /dev/null | tr -d '\r' | awk '{$NF=""; sub(/[[:space:]]+$/, ""); print}'); echo "$l_meta -> $t_meta"; else; twig --color always -psot -XUF -L $p; end; end; end
     function expose; set -l target (realpath $argv[1]); set -l name (test (count $argv) -gt 1; and echo $argv[2]; or basename $argv[1]); ln -sf $target ~/.local/bin/$name; echo "Exposed $target as $name"; end; abbr -a expose expose
     function unexpose; set -l target "$HOME/.local/bin/"(basename $argv); if test -L $target; rm $target; echo "Unexposed $target"; else; echo "Error: $target is not a symlink in local bin"; end; end; abbr -a unexpose unexpose
-    function sudo; test (count $argv) -ge 1; and test "$argv[1]" = "rm"; and command sudo /home/lewis/.local/bin/trash $argv[2..-1]; or command sudo $argv; end
-    function show_timestamp_after_command --on-event fish_postexec; set -l _ms (math -s0 "$CMD_DURATION_NS / 1000000"); set -l _ns (math "$CMD_DURATION_NS % 1000000"); set_color grey; printf "[%s] %d.%06d ms elapsed\n" (date "+%d/%m/%y %H:%M:%S") $_ms $_ns; set_color normal; end
+    function sudo; test (count $argv) -ge 1; and test "$argv[1]" = "rm"; and command sudo ~/.local/bin/trash $argv[2..-1]; or command sudo $argv; end
+    functions -e show_timestamp_after_command 2>/dev/null
+    function show_timestamp_after_command --on-event fish_postexec; set -l _cmd (string trim -- "$argv[1]"); test -n "$_cmd"; or return; set -l _ms (math -s0 "$CMD_DURATION_NS / 1000000"); set -l _ns (math "$CMD_DURATION_NS % 1000000"); set_color grey; printf "[%s] %d.%06d ms elapsed\n" (date "+%d/%m/%y %H:%M:%S") $_ms $_ns; set_color normal; end
     function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
     function smart_ctrl_backspace; set -l c (commandline); if test -n "$c"; commandline -f backward-kill-word; end; end
     function smart_ctrl_up; set -l c (commandline); set -l picker friz; set -l current_token (commandline -t); set -l search_dir "$PWD"; set -l token_path "$current_token"; if string match -rq '^~($|/)' -- "$token_path"; set token_path (string replace -r '^~' "$HOME" -- "$token_path"); end; if test -n "$current_token"; if test -d "$token_path"; set search_dir "$token_path"; else; set -l parent (path dirname -- "$token_path" 2>/dev/null); if test -d "$parent"; set search_dir "$parent"; end; end; end; set -l search_cmd; switch "$c"; case 'cd*'; set search_cmd unearth "*" -d -H --color=never "$search_dir"; case 'nano*' 'cat*'; set search_cmd unearth "*" -f -H --color=never "$search_dir"; case '*'; set search_cmd unearth "*" -H --color=never "$search_dir"; end; set -l r ($search_cmd | $picker --height 40% --reverse --header="Select path"); if test -n "$r"; if test -n "$current_token"; commandline -t -- (string escape -- "$r"); else; commandline -i (string escape -- "$r"); end; end; commandline -f repaint; end
