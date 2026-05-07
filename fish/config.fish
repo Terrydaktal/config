@@ -65,7 +65,9 @@ if status is-interactive
 
 end
 
-nvidia-settings -a "[gpu:0]/GPUPowerMizerMode=1" > /dev/null 2>&1
+if command -q nvidia-settings
+    nvidia-settings -a "[gpu:0]/GPUPowerMizerMode=1" > /dev/null 2>&1
+end
 
 # PCman scale fix
 alias pcmanfm='env GDK_DPI_SCALE=1.5 pcmanfm'
