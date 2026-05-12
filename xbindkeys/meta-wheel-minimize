@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lock=/tmp/xbind_lock
+stack=/tmp/min_stack
+
+mkdir "$lock" 2>/dev/null || exit 0
+trap 'rmdir "$lock" 2>/dev/null || true' EXIT
+
+wid=$(xdotool getmouselocation --shell | awk -F= '$1 == "WINDOW" { print $2 }')
+if [[ -n ${wid:-} ]]; then
+    printf '%s\n' "$wid" >> "$stack"
+    xdotool windowminimize "$wid"
+fi
+
+sleep 0.3

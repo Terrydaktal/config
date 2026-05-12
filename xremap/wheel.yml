@@ -1,0 +1,8 @@
+keymap:
+  - name: Shift wheel zoom
+    exact_match: false
+    remap:
+      Shift-XUpScroll: C-Super-equal
+      Shift-XDownScroll: C-Super-minus
+      Shift-XHIRES_UPSCROLL: []
+      Shift-XHIRES_DOWNSCROLL: []

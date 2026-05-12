@@ -1,0 +1,11 @@
+# Save operations
+bind ^S savefile main
+bind ^O writeout main
+
+# Paste operations
+bind ^Z undo main
+bind ^U undo main
+
+# Word deletion (modern functions)
+bind ^W chopwordleft main
+bind ^H chopwordleft main

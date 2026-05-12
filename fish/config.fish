@@ -4,7 +4,7 @@ if not set -q PASSGEN_PEPPER
 end
 
 set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
-set -gx LS_COLORS (dircolors -b ~/.config/fish/ls_colours.dircolors | string replace -r "^LS_COLORS='(.*)';\$" '$1')
+set -gx LS_COLORS (dircolors -b ~/.config/fish/ls_colours.dircolors | string match -r "^LS_COLORS='.*';\$" | string replace -r "^LS_COLORS='(.*)';\$" '$1')
 set -gx EZA_COLORS $LS_COLORS
     
 if status is-interactive

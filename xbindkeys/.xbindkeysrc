@@ -1,17 +1,17 @@
 # Show CopyQ
-"copyq show"
+"copyq toggle"
     Control+Shift+Mod4+Up
 
 #kill
 "bash -c 'wid=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2); if [ -n "$wid" ]; then wmctrl -i -c "$wid"; fi'"
  Control+m:0x40 + b:2
 
-# Debounced Minimize (Win + Wheel Down)
-"bash -c 'mkdir /tmp/xbind_lock 2>/dev/null || exit 0; wid=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2); echo $wid >> /tmp/min_stack; xdotool windowminimize $wid; sleep 0.3; rmdir /tmp/xbind_lock'"
+# Debounced Minimize (Meta + Wheel Down)
+"~/Dev/config/xbindkeys/meta-wheel-minimize"
   m:0x40 + b:5
 
-# Restore a window that has been minimized
-"bash -c 'mkdir /tmp/xbind_lock 2>/dev/null || exit 0; wid=$(tail -n 1 /tmp/min_stack); if [ -n \"$wid\" ]; then wmctrl -i -R $wid; sed -i \"\$d\" /tmp/min_stack; fi; sleep 0.3; rmdir /tmp/xbind_lock'"
+# Restore a window that has been minimized (Meta + Wheel Up)
+"~/Dev/config/xbindkeys/meta-wheel-restore"
   m:0x40 + b:4
 
 # Mouse Back -> Fish prevd in Terminal, standard Back elsewhere
@@ -48,8 +48,8 @@ b:9
     Control+Mod4 + 3
 
 # Slot 4
-"/home/lewis/.local/bin/launch-slot 4"
-    Control+Mod4 + f  - `Ctrl + Super + 6` 
+"~/.local/bin/launch-slot 4"
+    Control+Mod4 + f
 
 # Slot 4
 "/home/lewis/.local/bin/launch-slot 4"
@@ -83,13 +83,18 @@ b:9
 "/home/lewis/.local/bin/launch-slot 0"
     Control+Mod4 + 0
 
-"~/Dev/faster-whisperer/trigger.sh"
-    m:0x0 + c:82
+# Disabled here because this bare key grab currently prevents xbindkeys from starting.
+# "~/Dev/faster-whisperer/trigger.sh"
+#     m:0x0 + c:82
 
-#Cycle windows backward
-"cycle-windows forward"
-    Alt+Tab
+# Cycle windows backward
+# Disabled here because the window manager already grabs Alt+Tab globally.
+# "cycle-windows forward"
+#     Alt+Tab
 
-#Cycle windows forward
-"cycle-windows backward"
-    Alt+Shift+Tab
+# Cycle windows forward
+# "cycle-windows backward"
+#     Alt+Shift+Tab
+
+"true"
+  KP_Enter

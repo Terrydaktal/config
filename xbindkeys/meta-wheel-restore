@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lock=/tmp/xbind_lock
+stack=/tmp/min_stack
+
+mkdir "$lock" 2>/dev/null || exit 0
+trap 'rmdir "$lock" 2>/dev/null || true' EXIT
+
+if [[ -s "$stack" ]]; then
+    wid=$(tail -n 1 "$stack")
+    if [[ -n ${wid:-} ]]; then
+        wmctrl -i -R "$wid"
+        sed -i '$d' "$stack"
+    fi
+fi
+
+sleep 0.3
