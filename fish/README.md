@@ -50,6 +50,7 @@ This directory contains the active Fish shell configuration and related color to
 | `f` | Runs `unearth -CH -F --color=always --hyperlink` with passed args. |
 | `cd` | Uses `__zoxide_z` for explicit args. With no args, picks from `/tmp/fzf-history-$USER/universal-last-dirs-$fish_pid` via `friz`; falls back to generic `friz` picker. |
 | `cdi` | Runs `__zoxide_zi` with passed args. |
+| `mkcd` | Runs `mkdir -p` on the provided path and then `cd`s into the first argument. |
 | `nano` | Runs `command nano` for explicit args. With no args, picks from `/tmp/fzf-history-$USER/universal-last-files-$fish_pid` via `friz`; falls back to generic `friz` picker. |
 | `which` | For each `command -s` result, renders metadata using `twig`. For symlinks, prints link metadata then a combined `link -> target` metadata line. |
 | `expose` | Symlinks a resolved path into `~/.local/bin`; optional second arg overrides symlink name. |

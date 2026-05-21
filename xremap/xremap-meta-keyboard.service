@@ -1,0 +1,14 @@
+[Unit]
+Description=xremap keyboard normalizer for taskbar launch shortcuts
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/home/lewis/.cargo/bin/xremap --device /dev/input/by-id/usb-04d9_USB_Gaming_Mouse-if01-event-kbd --device /dev/input/by-id/usb-Corsair_Corsair_STRAFE_Gaming_Keyboard_0302100FAEB8942955B0A870F5001943-event-kbd --device /dev/input/by-id/usb-Corsair_Corsair_STRAFE_Gaming_Keyboard_0302100FAEB8942955B0A870F5001943-if01-event-kbd --output-device-name "xremap normalized keyboard" --allow-launch true --watch=config,device /home/lewis/Dev/config/xremap/meta-keyboard.yml
+Restart=on-failure
+RestartSec=1
+Environment=DISPLAY=:0
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+
+[Install]
+WantedBy=default.target

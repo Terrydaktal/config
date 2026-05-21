@@ -1,0 +1,29 @@
+# Normalize keyboard input for shortcuts that span multiple HID endpoints.
+#
+# The physical Meta key is exposed by the mouse's keyboard HID endpoint while
+# Ctrl and number keys come from the Corsair keyboard endpoints. This service
+# grabs only those explicit keyboard-capable devices, re-emits normal keyboard
+# input through one virtual keyboard, and handles Ctrl+Meta+1-9 without letting
+# the number key leak into the focused application.
+keymap:
+  - name: Launch fresh taskbar app instances
+    exact_match: false
+    remap:
+      C-Super-1:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "1"]
+      C-Super-2:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "2"]
+      C-Super-3:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "3"]
+      C-Super-4:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "4"]
+      C-Super-5:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "5"]
+      C-Super-6:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "6"]
+      C-Super-7:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "7"]
+      C-Super-8:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "8"]
+      C-Super-9:
+        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "9"]

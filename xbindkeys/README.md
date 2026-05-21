@@ -8,9 +8,9 @@ The system consists of a single **Unified Python Daemon** that acts as the "brai
 
 ### 1. The Daemon (`wayland_scroll_daemon.py`)
 This is the core background process. It performs the following roles:
-*   **Keyboard Interception**: Fully grabs the keyboard to catch shortcut modifiers (`Ctrl`, `Meta`, `Shift`) and number keys. It re-broadcasts non-intercepted keys to a "Virtual Keyboard."
-*   **Dynamic Mouse Grab**: To preserve 1000Hz gaming mouse performance, it only "grabs" the mouse when a modifier key (`Meta` or `Shift`) is held down. 
-*   **Input Swallowing**: It prevents remapped events (like the number '1' or a scroll wheel movement) from reaching the active application.
+*   **Keyboard Tracking**: Passively watches keyboard-capable HID endpoints to track shortcut modifiers (`Ctrl`, `Meta`, `Shift`). This includes devices exposed with names such as `USB Gaming Mouse` when they carry keyboard events. It does not create a virtual keyboard, so it cannot leave modifiers stuck in a held state.
+*   **Dynamic Mouse Grab**: To preserve 1000Hz gaming mouse performance, it only "grabs" the mouse when a modifier key (`Meta` or `Shift`) is held down and no physical mouse button is already pressed. Clicks that start before the modifier are left on the normal compositor path.
+*   **Input Swallowing**: It prevents grabbed mouse events such as modifier scroll and `Ctrl+Meta+Middle Click` from reaching the active application. `Ctrl+Meta+1-9` is handled by the separate `xremap-meta-keyboard` service, which normalizes the split keyboard endpoints and launches the numbered taskbar app directly.
 *   **Cleanup Logic**: Releases tracked virtual mouse buttons when modifier-driven mouse grabbing is dropped, and force-releases common modifiers/buttons on daemon shutdown so the desktop does not stay stuck in a grabbed state.
 
 ### 2. The Action Scripts
@@ -28,7 +28,7 @@ These scripts are triggered by the daemon and use `kdotool` to interact with KWi
 | **Meta + Scroll Down** | Minimize Window | Targets window under cursor; uses 200ms throttle. |
 | **Meta + Scroll Up** | Restore Window | Un-minimizes the last window in our stack. |
 | **Ctrl + Meta + Middle Click** | Close Window | Instantly kills the window under the cursor. |
-| **Ctrl + Meta + [1-9]** | Launch New App | Opens a fresh instance of the Nth pinned app. |
+| **Ctrl + Meta + [1-9]** | Launch New App | Handled by the KWin `taskbar-launch-shortcuts` script. It starts `launch-taskbar-app@N.service`, which runs `launch-taskbar-app.sh N` to open a fresh instance of the Nth pinned app. |
 | **Shift + Scroll** | Desktop Zoom | Triggers KWin Desktop Zoom via DBus; zero throttle (smooth). |
 
 ## Management
@@ -38,7 +38,10 @@ The system is managed as a standard **systemd user service**.
 *   **Restart Service**: `systemctl --user restart wayland-scroll-daemon.service`
 *   **Check Status**: `systemctl --user status wayland-scroll-daemon.service`
 *   **View Logs**: `journalctl --user -u wayland-scroll-daemon.service -f`
+*   **Reload xremap Keyboard Normalizer**: `systemctl --user restart xremap-meta-keyboard.service`
 
 ## File Locations
 *   **Scripts**: `~/Dev/config/xbindkeys/`
 *   **Service File**: `~/.config/systemd/user/wayland-scroll-daemon.service`
+*   **xremap Keyboard Normalizer**: `~/Dev/config/xremap/meta-keyboard.yml`, installed via `~/.config/systemd/user/xremap-meta-keyboard.service`.
+*   **Launch Template Service**: `~/Dev/config/systemd/user/launch-taskbar-app@.service`, installed to `~/.config/systemd/user/launch-taskbar-app@.service` for manual or alternate launch paths.
