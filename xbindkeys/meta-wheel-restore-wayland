@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+KDTOOL="$HOME/.cargo/bin/kdotool"
+stack="${XDG_RUNTIME_DIR:-/tmp}/meta-wheel-min-stack"
+if [[ -s "$stack" ]]; then
+    wid=$(tail -n 1 "$stack")
+    sed -i '$d' "$stack"
+    if [[ -n "$wid" ]]; then
+        $KDTOOL windowactivate "$wid" >/dev/null 2>&1 &
+    fi
+fi

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+KDTOOL="$HOME/.cargo/bin/kdotool"
+stack="${XDG_RUNTIME_DIR:-/tmp}/meta-wheel-min-stack"
+# Get the window ID under the mouse
+wid=$($KDTOOL getmouselocation getwindowid 2>/dev/null | tail -n 1 | tr -d '\r[:space:]')
+if [[ -n "$wid" && "$wid" != "0" ]]; then
+    echo "$wid" >> "$stack"
+    $KDTOOL windowminimize "$wid" >/dev/null 2>&1 &
+fi
