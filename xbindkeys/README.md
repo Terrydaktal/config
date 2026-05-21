@@ -11,7 +11,7 @@ This is the core background process. It performs the following roles:
 *   **Keyboard Interception**: Fully grabs the keyboard to catch shortcut modifiers (`Ctrl`, `Meta`, `Shift`) and number keys. It re-broadcasts non-intercepted keys to a "Virtual Keyboard."
 *   **Dynamic Mouse Grab**: To preserve 1000Hz gaming mouse performance, it only "grabs" the mouse when a modifier key (`Meta` or `Shift`) is held down. 
 *   **Input Swallowing**: It prevents remapped events (like the number '1' or a scroll wheel movement) from reaching the active application.
-*   **Anti-Stick Logic**: Automatically synthesizes "Release" events if modifiers are let go while a mouse button is held, preventing stuck clicks.
+*   **Cleanup Logic**: Releases tracked virtual mouse buttons when modifier-driven mouse grabbing is dropped, and force-releases common modifiers/buttons on daemon shutdown so the desktop does not stay stuck in a grabbed state.
 
 ### 2. The Action Scripts
 These scripts are triggered by the daemon and use `kdotool` to interact with KWin's internal window IDs.

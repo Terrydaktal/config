@@ -1,46 +1,28 @@
-# CopyQ Wayland Paste Configuration
+# CopyQ
 
-This directory contains the configuration and scripts to enable reliable, fast pasting for CopyQ on KDE Plasma Wayland (tested on CachyOS).
+This directory contains the CopyQ configuration used for Wayland paste support.
 
-## Prerequisites
+## Files
 
-1. **ydotool**: Install it and ensure the user service is running.
-   ```bash
-   sudo pacman -S ydotool
-   systemctl --user enable --now ydotool
-   ```
-2. **User Groups**: Your user must be in the "input" group.
-   ```bash
-   sudo usermod -aG input YOUR_USERNAME
-   ```
-   *(Requires logout/login to take effect)*
+- `copyq.conf`: main CopyQ preferences, symlinked from `~/.config/copyq/copyq.conf`.
+- `copyq-commands.ini`: CopyQ command list, including the Enter/paste override, symlinked from `~/.config/copyq/copyq-commands.ini`.
+- `copyq-wayland-paste.sh`: helper used by the command override to paste with `ydotool`.
+- `copyq_script_override.js`: standalone copy of the JavaScript override used inside `copyq-commands.ini`.
 
-## Structure
+## Paste Flow
 
-- scripts/copyq-wayland-paste.sh: A bash helper that uses ydotool to simulate Shift+Insert. It uses flock to prevent multiple pastes/loops and has minimal delays for high performance.
-- copyq_script_override.js: The JavaScript code to be added to CopyQ's command list.
+Pressing Enter on a selected CopyQ item calls the `global.paste()` override in `copyq-commands.ini`. The override hides CopyQ, then runs `copyq-wayland-paste.sh` with `YDOTOOL_SOCKET` set to the user runtime socket.
 
-## Setup Instructions
+The helper uses `flock` so repeated Enter presses do not overlap. It releases common stuck modifier keys, ensures `ydotoold` is reachable, starts either `ydotool.service` or `ydotoold.service` if needed, waits briefly for CopyQ to return focus to the previous window, then sends `Shift+Insert`.
 
-1. **Enable Native Paste in CopyQ**:
-   - Open CopyQ Preferences.
-   - Go to History tab.
-   - Check "Paste to current window".
+## Requirements
 
-2. **Add the Script Override**:
-   - Open CopyQ and press F6 to open Commands.
-   - Click "Add" -> "New Command".
-   - Set Name to "Wayland Paste Hijack".
-   - Set Type of Action to "Script".
-   - Copy the contents of copyq_script_override.js into the script box.
-   - Ensure the "helper" variable in the script points to the absolute path of copyq-wayland-paste.sh.
-
-3. **Verify**:
-   - Highlight an item in CopyQ.
-   - Press Enter.
-   - It should paste instantly into your focused window.
+- `ydotool` installed.
+- A working user service named `ydotool.service` or `ydotoold.service`.
+- The user must have permission to use uinput/input devices.
 
 ## Troubleshooting
 
-- **Delay too fast?**: If it pastes before the window focuses, add a small sleep(20) or sleep(50) to the global.paste function in copyq_script_override.js before runPasteWithYdotool().
-- **Permission Denied?**: Ensure ydotoold is running and you are in the input group.
+- `copyq-wayland-paste failed`: check that `ydotoold` is running and that `$XDG_RUNTIME_DIR/.ydotool_socket` accepts connections.
+- Stale socket after killing services: restart the ydotool user service.
+- Paste arrives too early: increase the `sleep 0.03` delay in `copyq-wayland-paste.sh`.

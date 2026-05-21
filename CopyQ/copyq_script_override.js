@@ -7,8 +7,7 @@ function runPasteWithYdotool() {
     if (!socket)
         socket = runtime + '/.ydotool_socket';
 
-    // Update this path to point to where you moved the bash script
-    var helper = Dir().homePath() + '/Dev/config/copyQ/scripts/copyq-wayland-paste.sh';
+    var helper = Dir().homePath() + '/Dev/config/CopyQ/copyq-wayland-paste.sh';
 
     var p = execute(
         'env',
