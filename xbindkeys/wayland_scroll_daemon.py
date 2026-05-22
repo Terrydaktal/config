@@ -25,6 +25,9 @@ state = {
     'swallow_middle': False
 }
 THROTTLE = 0.20
+DEVICE_WAIT_SECONDS = 15
+NORMALIZED_KEYBOARD_NAME = 'xremap normalized keyboard'
+MOUSE_BY_ID = '/dev/input/by-id/usb-04d9_USB_Gaming_Mouse-event-mouse'
 
 FORCED_BUTTON_RELEASES = {
     ecodes.BTN_LEFT, ecodes.BTN_RIGHT, ecodes.BTN_MIDDLE,
@@ -32,34 +35,68 @@ FORCED_BUTTON_RELEASES = {
     ecodes.BTN_FORWARD, ecodes.BTN_BACK, ecodes.BTN_TASK,
 }
 
-def get_devices():
+def is_modifier_keyboard(dev):
+    caps = dev.capabilities()
+    keys = caps.get(ecodes.EV_KEY, [])
+    return any(k in keys for k in [
+        ecodes.KEY_LEFTMETA, ecodes.KEY_RIGHTMETA,
+        ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTSHIFT,
+        ecodes.KEY_LEFTCTRL, ecodes.KEY_RIGHTCTRL,
+    ])
+
+def is_wheel_mouse(dev):
+    caps = dev.capabilities()
+    keys = caps.get(ecodes.EV_KEY, [])
+    rel = caps.get(ecodes.EV_REL, [])
+    return ecodes.REL_WHEEL in rel and any(k in keys for k in [
+        ecodes.BTN_LEFT, ecodes.BTN_RIGHT, ecodes.BTN_MIDDLE,
+    ])
+
+def open_stable_mouse():
+    try:
+        dev = evdev.InputDevice(MOUSE_BY_ID)
+        if is_wheel_mouse(dev):
+            return dev
+    except:
+        pass
+    return None
+
+def get_devices(require_normalized_keyboard=False):
     physical_keyboards = []
     normalized_keyboard = None
-    mice = []
+    stable_mouse = open_stable_mouse()
+    mice = [stable_mouse] if stable_mouse else []
     for path in evdev.list_devices():
         try:
             dev = evdev.InputDevice(path)
             name = dev.name or ''
             if 'ydotool' in name or 'Virtual Mouse' in name:
                 continue
-            caps = dev.capabilities()
-            if ecodes.EV_KEY in caps:
-                keys = caps[ecodes.EV_KEY]
-                if any(k in keys for k in [
-                    ecodes.KEY_LEFTMETA, ecodes.KEY_RIGHTMETA,
-                    ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTSHIFT,
-                    ecodes.KEY_LEFTCTRL, ecodes.KEY_RIGHTCTRL,
-                ]):
-                    if name == 'xremap normalized keyboard':
-                        normalized_keyboard = dev
-                    else:
-                        physical_keyboards.append(dev)
-            if ecodes.EV_REL in caps:
-                if 'Mouse' in name and ecodes.REL_WHEEL in caps[ecodes.EV_REL]:
-                    mice.append(dev)
+            if is_modifier_keyboard(dev):
+                if name == NORMALIZED_KEYBOARD_NAME:
+                    normalized_keyboard = dev
+                else:
+                    physical_keyboards.append(dev)
+            if not stable_mouse and 'Mouse' in name and is_wheel_mouse(dev):
+                mice.append(dev)
         except:
             pass
-    return ([normalized_keyboard] if normalized_keyboard else physical_keyboards), mice
+    if normalized_keyboard:
+        return [normalized_keyboard], mice
+    if require_normalized_keyboard:
+        return [], mice
+    return physical_keyboards, mice
+
+def wait_for_devices():
+    deadline = time.monotonic() + DEVICE_WAIT_SECONDS
+    while True:
+        keyboards, mice = get_devices(require_normalized_keyboard=True)
+        if keyboards and mice:
+            return keyboards, mice
+        if time.monotonic() >= deadline:
+            print(f"Timed out waiting for {NORMALIZED_KEYBOARD_NAME!r} and {MOUSE_BY_ID}", file=sys.stderr)
+            sys.exit(75)
+        time.sleep(0.25)
 
 def safe_vm_release(mice_with_uis):
     """Release tracked buttons and common pointer buttons on virtual mice."""
@@ -165,8 +202,7 @@ def mouse_worker(mouse, ui, mice_with_uis):
         os._exit(75)
 
 def main():
-    keyboards, mice = get_devices()
-    if not keyboards or not mice: sys.exit(1)
+    keyboards, mice = wait_for_devices()
     mice_with_uis = []
     threads = []
     for m in mice:
