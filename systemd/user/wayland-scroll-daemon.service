@@ -1,6 +1,6 @@
 [Unit]
 Description=Zero-Lag Wayland Scroll Shortcut Daemon
-After=graphical-session.target xremap-meta-keyboard.service
+After=graphical-session.target plasma-workspace-wayland.target xremap-meta-keyboard.service
 Requires=xremap-meta-keyboard.service
 
 [Service]
@@ -10,6 +10,12 @@ Restart=always
 RestartSec=1
 Environment=PYTHONUNBUFFERED=1
 Environment=XDG_RUNTIME_DIR=/run/user/%U
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus
+Environment=DISPLAY=:0
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=XDG_CURRENT_DESKTOP=KDE
+Environment=KDE_FULL_SESSION=true
+Environment=KDE_SESSION_VERSION=6
 
 [Install]
-WantedBy=default.target
+WantedBy=plasma-workspace-wayland.target

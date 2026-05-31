@@ -28,8 +28,8 @@ if status is-interactive
     alias cp '~/.local/bin/copy'
     alias tree '~/.local/bin/tree -FaG -L 2 -T 10 --hyperlink=auto --color=auto'
     alias mkdir 'mkdir -p'   
-    alias ls 'twig -AFU'
-    alias la 'ls -l'
+    alias ls 'twig -FU --almost-all'
+    alias la 'ls -la'
     alias pwd 'ls -ldX'
     alias dust 'ls -Sa --sort size --reverse'
     alias tile 'tile_windows 3' 
@@ -72,3 +72,7 @@ end
 
 # PCman scale fix
 alias pcmanfm='env GDK_DPI_SCALE=1.5 pcmanfm'
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/home/lewis/.local/bin" $PATH
