@@ -12,6 +12,8 @@ import os
 MINIMIZE_SCRIPT = '/home/lewis/Dev/config/xbindkeys/meta-wheel-minimize-wayland'
 RESTORE_SCRIPT = '/home/lewis/Dev/config/xbindkeys/meta-wheel-restore-wayland'
 CLOSE_SCRIPT = '/home/lewis/Dev/config/xbindkeys/meta-wheel-close-wayland'
+KDTOOL = os.path.expanduser('~/.cargo/bin/kdotool')
+TERMINAL_CLASS = 'xfce4-terminal'
 
 # Global state
 state = {
@@ -22,12 +24,19 @@ state = {
     'last_trigger': 0,
     'vm_pressed': set(),      # Buttons currently down on virtual mouse
     'physical_buttons': set(), # Buttons already down on the real mouse
-    'swallow_middle': False
+    'swallow_middle': False,
+    'swallow_terminal_nav': set(),
 }
 THROTTLE = 0.20
 DEVICE_WAIT_SECONDS = 15
 NORMALIZED_KEYBOARD_NAME = 'xremap normalized keyboard'
 MOUSE_BY_ID = '/dev/input/by-id/usb-04d9_USB_Gaming_Mouse-event-mouse'
+TERMINAL_NAV_BUTTONS = {
+    ecodes.BTN_SIDE: ecodes.KEY_LEFT,
+    ecodes.BTN_BACK: ecodes.KEY_LEFT,
+    ecodes.BTN_EXTRA: ecodes.KEY_RIGHT,
+    ecodes.BTN_FORWARD: ecodes.KEY_RIGHT,
+}
 
 FORCED_BUTTON_RELEASES = {
     ecodes.BTN_LEFT, ecodes.BTN_RIGHT, ecodes.BTN_MIDDLE,
@@ -60,6 +69,36 @@ def open_stable_mouse():
     except:
         pass
     return None
+
+def active_window_class():
+    try:
+        result = subprocess.run(
+            [KDTOOL, 'getactivewindow', 'getwindowclassname'],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=1,
+        )
+        if result.returncode == 0:
+            lines = (result.stdout or '').strip().splitlines()
+            if lines:
+                return lines[-1]
+    except:
+        pass
+    return ''
+
+def tap_alt_arrow(keyboard_ui, arrow_code):
+    if keyboard_ui is None:
+        return
+    try:
+        keyboard_ui.write(ecodes.EV_KEY, ecodes.KEY_LEFTALT, 1)
+        keyboard_ui.write(ecodes.EV_KEY, arrow_code, 1)
+        keyboard_ui.syn()
+        keyboard_ui.write(ecodes.EV_KEY, arrow_code, 0)
+        keyboard_ui.write(ecodes.EV_KEY, ecodes.KEY_LEFTALT, 0)
+        keyboard_ui.syn()
+    except:
+        pass
 
 def get_devices(require_normalized_keyboard=False):
     physical_keyboards = []
@@ -148,16 +187,40 @@ def keyboard_worker(kb, mice_with_uis):
         print(f"Keyboard worker error: {e}", file=sys.stderr)
         os._exit(75)
 
-def mouse_worker(mouse, ui, mice_with_uis):
+def mouse_worker(mouse, ui, keyboard_ui, mice_with_uis):
     try:
         for event in mouse.read_loop():
             is_grabbed = state['mouse_grabbed']
             is_pointer_button = event.type == ecodes.EV_KEY and event.code in FORCED_BUTTON_RELEASES
+            is_terminal_nav_button = event.type == ecodes.EV_KEY and event.code in TERMINAL_NAV_BUTTONS
             if is_pointer_button:
                 if event.value == 1:
                     state['physical_buttons'].add(event.code)
                 elif event.value == 0:
                     state['physical_buttons'].discard(event.code)
+
+            if is_terminal_nav_button:
+                if event.value == 1:
+                    state['physical_buttons'].add(event.code)
+                    if active_window_class() == TERMINAL_CLASS and keyboard_ui is not None:
+                        state['swallow_terminal_nav'].add(event.code)
+                        tap_alt_arrow(keyboard_ui, TERMINAL_NAV_BUTTONS[event.code])
+                    else:
+                        ui.write_event(event)
+                        if is_grabbed:
+                            state['vm_pressed'].add(event.code)
+                elif event.value == 0:
+                    state['physical_buttons'].discard(event.code)
+                    if event.code in state['swallow_terminal_nav']:
+                        state['swallow_terminal_nav'].discard(event.code)
+                    else:
+                        ui.write_event(event)
+                        if is_grabbed:
+                            state['vm_pressed'].discard(event.code)
+
+                if is_pointer_button or is_terminal_nav_button:
+                    update_mouse_grab_state(mice_with_uis)
+                continue
 
             if event.type == ecodes.EV_REL and event.code in [ecodes.REL_WHEEL, 11, 120, 121]:
                 if is_grabbed:
@@ -203,13 +266,20 @@ def mouse_worker(mouse, ui, mice_with_uis):
 
 def main():
     keyboards, mice = wait_for_devices()
+    keyboard_ui = None
     mice_with_uis = []
     threads = []
+    for kb in keyboards:
+        try:
+            keyboard_ui = evdev.UInput.from_device(kb, name=(kb.name or 'Virtual Keyboard') + ' (Virtual Keyboard)')
+            break
+        except:
+            pass
     for m in mice:
         try:
             ui = evdev.UInput.from_device(m, name=m.name + " (Virtual Mouse)")
             mice_with_uis.append((m, ui))
-            t = threading.Thread(target=mouse_worker, args=(m, ui, mice_with_uis), daemon=True)
+            t = threading.Thread(target=mouse_worker, args=(m, ui, keyboard_ui, mice_with_uis), daemon=True)
             t.start()
             threads.append(t)
         except: pass

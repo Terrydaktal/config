@@ -50,6 +50,8 @@ if status is-interactive
     function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
     function smart_ctrl_backspace; set -l c (commandline); if test -n "$c"; commandline -f backward-kill-word; end; end
     function smart_ctrl_up; set -l c (commandline); set -l picker friz; set -l current_token (commandline -t); set -l search_dir "$PWD"; set -l token_path "$current_token"; if string match -rq '^~($|/)' -- "$token_path"; set token_path (string replace -r '^~' "$HOME" -- "$token_path"); end; if test -n "$current_token"; if test -d "$token_path"; set search_dir "$token_path"; else; set -l parent (path dirname -- "$token_path" 2>/dev/null); if test -d "$parent"; set search_dir "$parent"; end; end; end; set -l search_cmd; switch "$c"; case 'cd*'; set search_cmd unearth "*" -d -H --color=never "$search_dir"; case 'nano*' 'cat*'; set search_cmd unearth "*" -f -H --color=never "$search_dir"; case '*'; set search_cmd unearth "*" -H --color=never "$search_dir"; end; set -l r ($search_cmd | $picker --height 40% --reverse --header="Select path"); if test -n "$r"; if test -n "$current_token"; commandline -t -- (string escape -- "$r"); else; commandline -i (string escape -- "$r"); end; end; commandline -f repaint; end
+    function smart_prevd; prevd; end
+    function smart_nextd; nextd; end
     functions -e __zoxide_auto_report 2>/dev/null; function __zoxide_auto_report --on-event fish_postexec; zoxide add "$PWD"; for a in (commandline --input="$argv[1]" --tokens-expanded 2>/dev/null); set -l p (path resolve -- "$a" 2>/dev/null); if test -n "$p"; and test -d "$p"; zoxide add "$p"; else if test -n "$p"; and test -e "$p"; zoxide add (path dirname -- "$p"); end; end; end
     function smart_enter; commandline -f execute; end
     function codex; command codex $argv; end
@@ -62,6 +64,10 @@ if status is-interactive
     bind -M insert \x1f xfce_click_handler
     bind -M default \x1f xfce_click_handler
     bind \e\[1\;5A smart_ctrl_up
+    bind -M insert \e\[1\;3D smart_prevd
+    bind -M insert \e\[1\;3C smart_nextd
+    bind -M default \e\[1\;3D smart_prevd
+    bind -M default \e\[1\;3C smart_nextd
     bind \b smart_ctrl_backspace
 
 end

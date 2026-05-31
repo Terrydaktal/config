@@ -29,6 +29,7 @@ These scripts are triggered by the daemon and use `kdotool` to interact with KWi
 | **Meta + Scroll Down** | Minimize Window | Targets window under cursor; uses 200ms throttle. |
 | **Meta + Scroll Up** | Restore Window | Un-minimizes the last window in our stack. |
 | **Ctrl + Meta + Middle Click** | Close Window | Instantly kills the window under the cursor. |
+| **Mouse Back/Forward in `xfce4-terminal`** | Directory History | Emits `Alt+Left` / `Alt+Right`, which fish binds to `prevd` / `nextd`. |
 | **Ctrl + Meta + [1-9]** | Launch New App | Handled by `xremap-meta-keyboard.service`, which runs `launch-taskbar-app.sh N` to open a fresh instance of the Nth pinned app. |
 | **Shift + Scroll** | Desktop Zoom | Triggers KWin Desktop Zoom via DBus; zero throttle (smooth). |
 
