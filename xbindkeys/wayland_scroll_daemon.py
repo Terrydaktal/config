@@ -30,6 +30,7 @@ state = {
 THROTTLE = 0.20
 DEVICE_WAIT_SECONDS = 15
 NORMALIZED_KEYBOARD_NAME = 'xremap normalized keyboard'
+TERMINAL_NAV_KEYBOARD_NAME = 'wayland terminal nav keyboard'
 MOUSE_BY_ID = '/dev/input/by-id/usb-04d9_USB_Gaming_Mouse-event-mouse'
 TERMINAL_NAV_BUTTONS = {
     ecodes.BTN_SIDE: ecodes.KEY_LEFT,
@@ -99,6 +100,15 @@ def tap_alt_arrow(keyboard_ui, arrow_code):
         keyboard_ui.syn()
     except:
         pass
+
+def create_terminal_nav_keyboard():
+    return evdev.UInput({
+        ecodes.EV_KEY: [
+            ecodes.KEY_LEFTALT,
+            ecodes.KEY_LEFT,
+            ecodes.KEY_RIGHT,
+        ],
+    }, name=TERMINAL_NAV_KEYBOARD_NAME)
 
 def get_devices(require_normalized_keyboard=False):
     physical_keyboards = []
@@ -269,12 +279,10 @@ def main():
     keyboard_ui = None
     mice_with_uis = []
     threads = []
-    for kb in keyboards:
-        try:
-            keyboard_ui = evdev.UInput.from_device(kb, name=(kb.name or 'Virtual Keyboard') + ' (Virtual Keyboard)')
-            break
-        except:
-            pass
+    try:
+        keyboard_ui = create_terminal_nav_keyboard()
+    except:
+        pass
     for m in mice:
         try:
             ui = evdev.UInput.from_device(m, name=m.name + " (Virtual Mouse)")
