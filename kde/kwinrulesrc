@@ -1,0 +1,10 @@
+[598aa704-a8d3-48fe-a403-c7db81433f75]
+Description=Settings for plasmashell
+fsplevel=4
+fsplevelrule=2
+wmclass=plasmashell
+wmclassmatch=1
+
+[General]
+count=1
+rules=598aa704-a8d3-48fe-a403-c7db81433f75

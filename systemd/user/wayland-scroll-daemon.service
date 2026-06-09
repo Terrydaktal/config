@@ -5,7 +5,7 @@ Requires=xremap-meta-keyboard.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/lewis/Dev/config/xbindkeys/wayland_scroll_daemon.py
+ExecStart=/usr/bin/python3 /home/lewis/Dev/config/wayland/wayland_scroll_daemon.py
 Restart=always
 RestartSec=1
 Environment=PYTHONUNBUFFERED=1

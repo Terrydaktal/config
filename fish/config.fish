@@ -3,7 +3,7 @@ if not set -q PASSGEN_PEPPER
     set -gx PASSGEN_PEPPER "REDACTED"
 end
 
-set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
+set -gx JAVA_HOME /usr/lib/jvm/java-17-openjdk
 set -gx LS_COLORS (dircolors -b ~/.config/fish/ls_colours.dircolors | string match -r "^LS_COLORS='.*';\$" | string replace -r "^LS_COLORS='(.*)';\$" '$1')
 set -gx EZA_COLORS $LS_COLORS
     
@@ -37,7 +37,7 @@ if status is-interactive
 
     # Functions
     function f; unearth -CH -F --color=always --hyperlink $argv; end    
-    function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-dirs-$fish_pid; if test -s $file; set -l t (cat $file | friz --height 40% --reverse --header="Select path"); if test -n "$t"; if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; else; set -l t (friz --height 40% --reverse --header="Select path"); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end; end
+    function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l t (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -d -H --color=never .); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end
     function cdi; __zoxide_zi $argv; end
     function mkcd; command mkdir -p -- $argv; and cd -- $argv[1]; end
     function nano; if set -q argv[1]; command nano $argv; else; set -l file /tmp/fzf-history-$USER/universal-last-files-$fish_pid; if test -s $file; set -l t (cat $file | friz --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; else; set -l t (friz --height 40% --reverse --header="Select file"); test -n "$t"; and command nano "$t"; end; end; end
@@ -49,7 +49,7 @@ if status is-interactive
     function show_timestamp_after_command --on-event fish_postexec; set -l _cmd (string trim -- "$argv[1]"); test -n "$_cmd"; or return; set -l _ms (math -s0 "$CMD_DURATION_NS / 1000000"); set -l _ns (math "$CMD_DURATION_NS % 1000000"); set_color grey; printf "[%s] %d.%06d ms elapsed\n" (date "+%d/%m/%y %H:%M:%S") $_ms $_ns; set_color normal; end
     function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
     function smart_ctrl_backspace; set -l c (commandline); if test -n "$c"; commandline -f backward-kill-word; end; end
-    function smart_ctrl_up; set -l c (commandline); set -l picker friz; set -l current_token (commandline -t); set -l search_dir "$PWD"; set -l token_path "$current_token"; if string match -rq '^~($|/)' -- "$token_path"; set token_path (string replace -r '^~' "$HOME" -- "$token_path"); end; if test -n "$current_token"; if test -d "$token_path"; set search_dir "$token_path"; else; set -l parent (path dirname -- "$token_path" 2>/dev/null); if test -d "$parent"; set search_dir "$parent"; end; end; end; set -l search_cmd; switch "$c"; case 'cd*'; set search_cmd unearth "*" -d -H --color=never "$search_dir"; case 'nano*' 'cat*'; set search_cmd unearth "*" -f -H --color=never "$search_dir"; case '*'; set search_cmd unearth "*" -H --color=never "$search_dir"; end; set -l r ($search_cmd | $picker --height 40% --reverse --header="Select path"); if test -n "$r"; if test -n "$current_token"; commandline -t -- (string escape -- "$r"); else; commandline -i (string escape -- "$r"); end; end; commandline -f repaint; end
+    function smart_ctrl_up; set -l c (commandline); set -l current_token (commandline -t); set -l search_dir "$PWD"; set -l token_path "$current_token"; if string match -rq '^~($|/)' -- "$token_path"; set token_path (string replace -r '^~' "$HOME" -- "$token_path"); end; if test -n "$current_token"; if test -d "$token_path"; set search_dir "$token_path"; else; set -l parent (path dirname -- "$token_path" 2>/dev/null); if test -d "$parent"; set search_dir "$parent"; end; end; end; set -l r; switch "$c"; case 'cd*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -d -H --color=never "$search_dir"); case 'nano*' 'cat*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -f -H --color=never "$search_dir"); case '*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -H --color=never "$search_dir"); end; if test -n "$r"; if test -n "$current_token"; commandline -t -- (string escape -- "$r"); else; commandline -i (string escape -- "$r"); end; end; commandline -f repaint; end
     function smart_prevd; prevd; commandline -f repaint; end
     function smart_nextd; nextd; commandline -f repaint; end
     functions -e __zoxide_auto_report 2>/dev/null; function __zoxide_auto_report --on-event fish_postexec; zoxide add "$PWD"; for a in (commandline --input="$argv[1]" --tokens-expanded 2>/dev/null); set -l p (path resolve -- "$a" 2>/dev/null); if test -n "$p"; and test -d "$p"; zoxide add "$p"; else if test -n "$p"; and test -e "$p"; zoxide add (path dirname -- "$p"); end; end; end

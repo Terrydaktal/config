@@ -3,4 +3,4 @@ Description=Launch taskbar app %i
 
 [Service]
 Type=oneshot
-ExecStart=/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh %i
+ExecStart=/home/lewis/Dev/config/bin/launch-taskbar-app.sh %i

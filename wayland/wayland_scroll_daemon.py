@@ -9,9 +9,9 @@ import signal
 import os
 
 # Paths to scripts
-MINIMIZE_SCRIPT = '/home/lewis/Dev/config/xbindkeys/meta-wheel-minimize-wayland'
-RESTORE_SCRIPT = '/home/lewis/Dev/config/xbindkeys/meta-wheel-restore-wayland'
-CLOSE_SCRIPT = '/home/lewis/Dev/config/xbindkeys/meta-wheel-close-wayland'
+MINIMIZE_SCRIPT = '/home/lewis/Dev/config/wayland/meta-wheel-minimize-wayland'
+RESTORE_SCRIPT = '/home/lewis/Dev/config/wayland/meta-wheel-restore-wayland'
+CLOSE_SCRIPT = '/home/lewis/Dev/config/wayland/meta-wheel-close-wayland'
 KDTOOL = os.path.expanduser('~/.cargo/bin/kdotool')
 TERMINAL_CLASS = 'xfce4-terminal'
 
@@ -237,7 +237,7 @@ def mouse_worker(mouse, ui, keyboard_ui, mice_with_uis):
                     if event.code == ecodes.REL_WHEEL:
                         now = time.time()
                         if state['shift'] or (now - state['last_trigger'] > THROTTLE):
-                            if state['meta']:
+                            if state['meta'] and not state['ctrl']:
                                 if event.value < 0: subprocess.Popen([MINIMIZE_SCRIPT])
                                 elif event.value > 0: subprocess.Popen([RESTORE_SCRIPT])
                             elif state['shift']:

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -u
+
+PATH=/usr/bin:/bin:/usr/local/bin
+STATE_DIR="${XDG_RUNTIME_DIR:-/run/user/$UID}"
+STATE_FILE="$STATE_DIR/kde-refresh-powerdevil-after-lock.brightness"
+COOLDOWN_SEC=10
+last_refresh=0
+
+log() {
+    printf '%s %s\n' "$(date --iso-8601=seconds)" "$*"
+}
+
+brightness_now() {
+    qdbus6 org.kde.Solid.PowerManagement \
+        /org/kde/Solid/PowerManagement/Actions/BrightnessControl \
+        org.kde.Solid.PowerManagement.Actions.BrightnessControl.brightness 2>/dev/null
+}
+
+remember_brightness() {
+    local value
+    value="$(brightness_now || true)"
+    case "$value" in
+        ''|*[!0-9]*) return 0 ;;
+    esac
+    printf '%s\n' "$value" > "$STATE_FILE"
+    log "remembered brightness $value before lock"
+}
+
+restore_brightness() {
+    local value
+    [ -r "$STATE_FILE" ] || return 0
+    value="$(sed -n '1p' "$STATE_FILE" 2>/dev/null)"
+    case "$value" in
+        ''|*[!0-9]*) return 0 ;;
+    esac
+    qdbus6 org.kde.Solid.PowerManagement \
+        /org/kde/Solid/PowerManagement/Actions/BrightnessControl \
+        org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness "$value" >/dev/null 2>&1 || true
+    log "restored brightness $value after unlock"
+}
+
+refresh_powerdevil_after_unlock() {
+    local now
+    now="$(date +%s)"
+    if [ $((now - last_refresh)) -lt "$COOLDOWN_SEC" ]; then
+        return 0
+    fi
+    last_refresh="$now"
+
+    log "unlock detected; refreshing PowerDevil"
+    qdbus6 org.kde.Solid.PowerManagement \
+        /org/kde/Solid/PowerManagement \
+        org.kde.Solid.PowerManagement.reparseConfiguration >/dev/null 2>&1 || true
+    systemctl --user restart plasma-powerdevil.service >/dev/null 2>&1 || true
+    sleep 2
+    restore_brightness
+}
+
+log "started; waiting for KDE lock/unlock events"
+
+dbus-monitor "interface='org.freedesktop.ScreenSaver',member='ActiveChanged'" 2>/dev/null | while IFS= read -r line; do
+    case "$line" in
+        *"boolean true"*)
+            remember_brightness
+            ;;
+        *"boolean false"*)
+            refresh_powerdevil_after_unlock
+            ;;
+    esac
+done

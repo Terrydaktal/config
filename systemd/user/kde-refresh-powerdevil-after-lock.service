@@ -1,0 +1,13 @@
+[Unit]
+Description=Refresh KDE PowerDevil brightness after locked display wake
+After=graphical-session.target plasma-powerdevil.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/kde-refresh-powerdevil-after-lock
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

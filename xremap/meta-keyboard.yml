@@ -10,20 +10,20 @@ keymap:
     exact_match: false
     remap:
       C-Super-1:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "1"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
       C-Super-2:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "2"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "2"]
       C-Super-3:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "3"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "3"]
       C-Super-4:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "4"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "4"]
       C-Super-5:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "5"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "5"]
       C-Super-6:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "6"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "6"]
       C-Super-7:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "7"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "7"]
       C-Super-8:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "8"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "8"]
       C-Super-9:
-        launch: ["/home/lewis/Dev/config/xbindkeys/launch-taskbar-app.sh", "9"]
+        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "9"]
