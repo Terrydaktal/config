@@ -9,6 +9,8 @@ keymap:
   - name: Launch fresh taskbar app instances
     exact_match: false
     remap:
+      KEY_KPENTER: null
+      C-w: null
       C-Super-1:
         launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
       C-Super-2:

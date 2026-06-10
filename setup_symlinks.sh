@@ -100,6 +100,7 @@ migrate_and_link "~/.config/powermanagementprofilesrc" "$REPO_DIR/kde/powermanag
 migrate_and_link "~/.config/plasmashellrc" "$REPO_DIR/kde/plasmashellrc"
 migrate_and_link "~/.config/plasma-org.kde.plasma.desktop-appletsrc" "$REPO_DIR/kde/plasma-org.kde.plasma.desktop-appletsrc"
 migrate_and_link "~/.config/baloofilerc" "$REPO_DIR/kde/baloofilerc"
+migrate_and_link "~/.config/mimeapps.list" "$REPO_DIR/kde/mimeapps.list"
 
 # Git config
 migrate_and_link "~/.gitconfig" "$REPO_DIR/git/gitconfig"
