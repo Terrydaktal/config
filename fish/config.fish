@@ -24,16 +24,17 @@ if status is-interactive
 
     # Aliases
     alias mv '~/.local/bin/copy --move'
-    alias rm '~/.local/bin/trash'
     alias cp '~/.local/bin/copy'
     alias tree '~/.local/bin/tree -FaG -L 2 -T 10 --hyperlink=auto --color=auto'
     alias mkdir 'mkdir -p'   
     alias ls 'twig -FU --almost-all'
     alias la 'ls -la'
-    alias pwd 'ls -ldX'
+    alias pwd 'ls -lnX'
     alias dust 'ls -Sa --sort size --reverse'
     alias tile 'tile_windows 3' 
-    alias lt 'tree'
+    alias lt 'tree 3'
+    alias t 'lt'
+    alias l 'la'
 
     # Functions
     function f; unearth -CH -F --color=always --hyperlink $argv; end    
@@ -47,6 +48,8 @@ if status is-interactive
     function sudo; test (count $argv) -ge 1; and test "$argv[1]" = "rm"; and command sudo ~/.local/bin/trash $argv[2..-1]; or command sudo $argv; end
     functions -e show_timestamp_after_command 2>/dev/null
     function show_timestamp_after_command --on-event fish_postexec; set -l _cmd (string trim -- "$argv[1]"); test -n "$_cmd"; or return; set -l _ms (math -s0 "$CMD_DURATION_NS / 1000000"); set -l _ns (math "$CMD_DURATION_NS % 1000000"); set_color grey; printf "[%s] %d.%06d ms elapsed\n" (date "+%d/%m/%y %H:%M:%S") $_ms $_ns; set_color normal; end
+    functions -e __restore_ibeam_cursor 2>/dev/null
+    function __restore_ibeam_cursor --on-event fish_prompt; test -t 1; and builtin printf '\e[6 q'; end
     function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
     function smart_ctrl_backspace; set -l c (commandline); if test -n "$c"; commandline -f backward-kill-word; end; end
     function smart_ctrl_up; set -l c (commandline); set -l current_token (commandline -t); set -l search_dir "$PWD"; set -l token_path "$current_token"; if string match -rq '^~($|/)' -- "$token_path"; set token_path (string replace -r '^~' "$HOME" -- "$token_path"); end; if test -n "$current_token"; if test -d "$token_path"; set search_dir "$token_path"; else; set -l parent (path dirname -- "$token_path" 2>/dev/null); if test -d "$parent"; set search_dir "$parent"; end; end; end; set -l r; switch "$c"; case 'cd*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -d -H --color=never "$search_dir"); case 'nano*' 'cat*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -f -H --color=never "$search_dir"); case '*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -H --color=never "$search_dir"); end; if test -n "$r"; if test -n "$current_token"; commandline -t -- (string escape -- "$r"); else; commandline -i (string escape -- "$r"); end; end; commandline -f repaint; end

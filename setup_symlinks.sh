@@ -102,6 +102,10 @@ migrate_and_link "~/.config/plasma-org.kde.plasma.desktop-appletsrc" "$REPO_DIR/
 migrate_and_link "~/.config/baloofilerc" "$REPO_DIR/kde/baloofilerc"
 migrate_and_link "~/.config/mimeapps.list" "$REPO_DIR/kde/mimeapps.list"
 
+# PCManFM and LibFM configs
+migrate_and_link "~/.config/pcmanfm/default/pcmanfm.conf" "$REPO_DIR/pcmanfm/pcmanfm.conf"
+migrate_and_link "~/.config/libfm/libfm.conf" "$REPO_DIR/pcmanfm/libfm.conf"
+
 # Git config
 migrate_and_link "~/.gitconfig" "$REPO_DIR/git/gitconfig"
 
@@ -150,6 +154,15 @@ for rule in "${udev_rules[@]}"; do
         echo "⚠ udev rule $rule not found"
     fi
 done
+
+# Track custom systemd system services
+mkdir -p "$REPO_DIR/etc/systemd/system"
+if [ -f "/etc/systemd/system/nvidia-power-limit.service" ]; then
+    cp "/etc/systemd/system/nvidia-power-limit.service" "$REPO_DIR/etc/systemd/system/nvidia-power-limit.service"
+    echo "✔ Copied /etc/systemd/system/nvidia-power-limit.service to repo"
+else
+    echo "⚠ /etc/systemd/system/nvidia-power-limit.service not found"
+fi
 
 echo -e "\n=== 4. Reloading systemd user manager ==="
 systemctl --user daemon-reload

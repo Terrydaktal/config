@@ -26,6 +26,10 @@ tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"wi
 padding=4
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 
+[Tiling][068353db-b73c-45d9-b9dc-f144ccf93136][e85f373c-dda0-4dbe-8f85-b867ed6de32d]
+padding=4
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+
 [Windows]
 FocusStealingPreventionLevel=0
 
