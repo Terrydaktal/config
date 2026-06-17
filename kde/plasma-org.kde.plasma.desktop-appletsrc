@@ -62,17 +62,6 @@ popupWidth=647
 [Containments][2][Applets][3][Configuration][General]
 favoritesPortedToKAstats=true
 
-[Containments][2][Applets][4]
-immutability=1
-plugin=org.kde.plasma.pager
-
-[Containments][2][Applets][5]
-immutability=1
-plugin=org.kde.plasma.icontasks
-
-[Containments][2][Applets][5][Configuration][General]
-launchers=applications:xfce4-terminal.desktop,applications:pcmanfm.desktop,applications:org.xfce.mousepad.desktop,applications:firefox.desktop,applications:google-chrome.desktop,applications:org.telegram.desktop.desktop,applications:Alacritty.desktop,applications:org.coolercontrol.CoolerControl.desktop,applications:com.github.hluk.copyq.desktop,applications:iris.desktop
-
 [Containments][2][Applets][6]
 immutability=1
 plugin=org.kde.plasma.marginsseparator
@@ -160,8 +149,32 @@ extraItems=org.kde.plasma.vault,org.kde.plasma.notifications,org.kde.plasma.volu
 knownItems=org.kde.plasma.vault,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.clipboard,org.kde.plasma.cameraindicator,org.kde.plasma.keyboardindicator,org.kde.plasma.battery,org.kde.plasma.brightness,org.kde.plasma.mediacontroller,org.kde.plasma.printmanager,org.kde.plasma.keyboardlayout,org.kde.plasma.weather,org.kde.plasma.networkmanagement,org.kde.plasma.manage-inputmethod,org.kde.plasma.devicenotifier,org.kde.kscreen,org.kde.plasma.bluetooth
 
 [Containments][2][General]
-AppletOrder=3;4;5;6;7;21;22
+AppletOrder=3;6;7;21;22
+
+[Containments][26]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=4
+plugin=org.kde.panel
+wallpaperplugin=org.kde.image
+
+[Containments][26][Applets][27]
+immutability=1
+plugin=org.kde.plasma.icontasks
+
+[Containments][26][Applets][27][Configuration][ConfigDialog]
+DialogHeight=630
+DialogWidth=810
+
+[Containments][26][Applets][27][Configuration][General]
+fill=false
+launchers=applications:xfce4-terminal.desktop,preferred://filemanager,applications:org.xfce.mousepad.desktop,applications:firefox.desktop,preferred://browser,applications:org.telegram.desktop.desktop
+
+[Containments][26][General]
+AppletOrder=27
 
 [ScreenMapping]
 itemsOnDisabledScreens=
-screenMapping=desktop:/boot,0,714198cd-af77-45a5-bc50-082fd5abe07e,desktop:/backups,0,714198cd-af77-45a5-bc50-082fd5abe07e
+screenMapping=desktop:/backups,0,714198cd-af77-45a5-bc50-082fd5abe07e,desktop:/boot,0,714198cd-af77-45a5-bc50-082fd5abe07e

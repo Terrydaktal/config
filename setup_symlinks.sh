@@ -73,6 +73,7 @@ done
 redundant_files=(
     "~/.config/systemd/user/xremap-keyboard.service"
     "~/.config/systemd/user/xremap-wheel.service"
+    "~/.config/systemd/user/launch-taskbar-app@.service"
     "~/.config/xremap/keyboard.yml"
     "~/.config/xremap/config.yml"
     "~/.config/xremap/test_config.yml"
@@ -106,6 +107,11 @@ migrate_and_link "~/.config/mimeapps.list" "$REPO_DIR/kde/mimeapps.list"
 migrate_and_link "~/.config/pcmanfm/default/pcmanfm.conf" "$REPO_DIR/pcmanfm/pcmanfm.conf"
 migrate_and_link "~/.config/libfm/libfm.conf" "$REPO_DIR/pcmanfm/libfm.conf"
 
+# Application Launcher configs
+migrate_and_link "~/.config/applicationlauncher/pinned_apps.txt" "$REPO_DIR/applicationlauncher/pinned_apps.txt"
+migrate_and_link "~/.config/applicationlauncher/settings.txt" "$REPO_DIR/applicationlauncher/settings.txt"
+migrate_and_link "~/.config/applicationlauncher/window_size.txt" "$REPO_DIR/applicationlauncher/window_size.txt"
+
 # Git config
 migrate_and_link "~/.gitconfig" "$REPO_DIR/git/gitconfig"
 
@@ -113,9 +119,8 @@ migrate_and_link "~/.gitconfig" "$REPO_DIR/git/gitconfig"
 migrate_and_link "~/.config/autostart/com.github.hluk.copyq.desktop" "$REPO_DIR/autostart/com.github.hluk.copyq.desktop"
 
 # Systemd user units (already in repo)
-migrate_and_link "~/.config/systemd/user/launch-taskbar-app@.service" "$REPO_DIR/systemd/user/launch-taskbar-app@.service"
 migrate_and_link "~/.config/systemd/user/wayland-scroll-daemon.service" "$REPO_DIR/systemd/user/wayland-scroll-daemon.service"
-migrate_and_link "~/.config/systemd/user/xremap-meta-keyboard.service" "$REPO_DIR/xremap/xremap-meta-keyboard.service"
+migrate_and_link "~/.config/systemd/user/xremap-meta-keyboard.service" "$REPO_DIR/systemd/user/xremap-meta-keyboard.service"
 
 # New systemd user unit & helper script
 migrate_and_link "~/.config/systemd/user/kde-refresh-powerdevil-after-lock.service" "$REPO_DIR/systemd/user/kde-refresh-powerdevil-after-lock.service"

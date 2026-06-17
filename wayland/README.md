@@ -30,7 +30,7 @@ These scripts are triggered by the daemon and use `kdotool` to interact with KWi
 | **Meta + Scroll Up** | Restore Window | Un-minimizes the last window in our stack. |
 | **Ctrl + Meta + Middle Click** | Close Window | Instantly kills the window under the cursor. |
 | **Mouse Back/Forward in `xfce4-terminal`** | Directory History | Emits `Alt+Left` / `Alt+Right`, which fish binds to `prevd` / `nextd`. |
-| **Ctrl + Meta + [1-9]** | Launch New App | Handled by `xremap-meta-keyboard.service`, which runs `launch-taskbar-app.sh N` from `~/Dev/config/bin/` to open a fresh instance of the Nth pinned app. |
+| **Ctrl + Meta + [1-9]** | Launch New App | Handled directly by `xremap-meta-keyboard.service`, which runs `launch-taskbar-app.sh N` from `~/Dev/config/bin/` to open a fresh instance of the Nth pinned app. |
 | **Shift + Scroll** | Desktop Zoom | Triggers KWin Desktop Zoom via DBus; zero throttle (smooth). |
 
 ## Management
@@ -38,6 +38,7 @@ These scripts are triggered by the daemon and use `kdotool` to interact with KWi
 The system is managed as a standard **systemd user service**.
 
 *   **Restart Service**: `systemctl --user restart wayland-scroll-daemon.service`
+*   **Restore Full Shortcut Stack**: If shortcut handling stops working after stopping services or probing input devices, restart the whole user-service chain with `systemctl --user restart xremap-meta-keyboard.service wayland-scroll-daemon.service ydotool.service`
 *   **Check Status**: `systemctl --user status wayland-scroll-daemon.service`
 *   **View Logs**: `journalctl --user -u wayland-scroll-daemon.service -f`
 *   **Reload xremap Keyboard Normalizer**: `systemctl --user restart xremap-meta-keyboard.service`
@@ -47,5 +48,5 @@ The system is managed as a standard **systemd user service**.
 *   **Wayland Scripts**: `~/Dev/config/wayland/`
 *   **Shared Launcher Script**: `~/Dev/config/bin/launch-taskbar-app.sh`
 *   **Service File**: `~/Dev/config/systemd/user/wayland-scroll-daemon.service`, installed to `~/.config/systemd/user/wayland-scroll-daemon.service`.
-*   **xremap Keyboard Normalizer**: `~/Dev/config/xremap/meta-keyboard.yml`, installed via `~/.config/systemd/user/xremap-meta-keyboard.service`.
-*   **Launch Template Service**: `~/Dev/config/systemd/user/launch-taskbar-app@.service`, installed to `~/.config/systemd/user/launch-taskbar-app@.service` for manual or alternate launch paths.
+*   **xremap Keyboard Normalizer Config**: `~/Dev/config/xremap/meta-keyboard.yml`
+*   **xremap Keyboard Normalizer Service**: `~/Dev/config/systemd/user/xremap-meta-keyboard.service`, installed to `~/.config/systemd/user/xremap-meta-keyboard.service`.

@@ -3,14 +3,19 @@
 # The physical Meta key is exposed by the mouse's keyboard HID endpoint while
 # Ctrl and number keys come from the Corsair keyboard endpoints. This service
 # grabs only those explicit keyboard-capable devices, re-emits normal keyboard
-# input through one virtual keyboard, and handles Ctrl+Meta+1-9 without letting
-# the number key leak into the focused application.
+# input through one virtual keyboard, handles Ctrl+Meta+1-9 without letting
+# the number key leak into the focused application, and exposes extra Meta-only
+# launch shortcuts from the same normalized device.
 keymap:
   - name: Launch fresh taskbar app instances
     exact_match: false
     remap:
       KEY_KPENTER: null
       C-w: null
+      Super-grave:
+        launch: ["/home/lewis/.local/bin/applicationlauncher"]
+      C-grave:
+        launch: ["/home/lewis/.local/bin/applicationlauncher"]
       C-Super-1:
         launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
       C-Super-2:

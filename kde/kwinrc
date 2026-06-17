@@ -12,9 +12,9 @@ CommandAllWheel=Nothing
 Modifier=Meta
 
 [Plugins]
+applicationlauncher-window-feedEnabled=true
 magiclampEnabled=true
 squashEnabled=false
-taskbar-launch-shortcutsEnabled=true
 wobblywindowsEnabled=true
 zoomEnabled=true
 

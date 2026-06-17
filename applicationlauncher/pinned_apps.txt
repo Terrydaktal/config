@@ -1,0 +1,17 @@
+/usr/share/applications/google-chrome.desktop
+/usr/share/applications/libreoffice-writer.desktop
+/usr/share/applications/com.obsproject.Studio.desktop
+/home/lewis/.local/share/applications/kolourpaint.desktop
+/usr/share/applications/org.coolercontrol.CoolerControl.desktop
+/usr/share/applications/torbrowser.desktop
+/usr/share/applications/org.xfce.mousepad.desktop
+/usr/share/applications/org.kde.dolphin.desktop
+/usr/share/applications/libreoffice-calc.desktop
+/usr/share/applications/pcmanfm.desktop
+/home/lewis/.local/share/applications/iris.desktop
+/usr/share/applications/org.telegram.desktop.desktop
+/usr/share/applications/kdesystemsettings.desktop
+/usr/share/applications/firefox.desktop
+/home/lewis/.local/share/applications/xfce4-terminal.desktop
+/home/lewis/.local/share/applications/com.github.hluk.copyq.desktop
+/usr/share/applications/virt-manager.desktop
