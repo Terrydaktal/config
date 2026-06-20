@@ -14,12 +14,15 @@ RESTORE_SCRIPT = '/home/lewis/Dev/config/wayland/meta-wheel-restore-wayland'
 CLOSE_SCRIPT = '/home/lewis/Dev/config/wayland/meta-wheel-close-wayland'
 KDTOOL = os.path.expanduser('~/.cargo/bin/kdotool')
 TERMINAL_CLASS = 'xfce4-terminal'
+RUNTIME_DIR = os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')
+MODIFIER_STATE_FILE = os.path.join(RUNTIME_DIR, 'wayland_modifier_state.env')
 
 # Global state
 state = {
     'meta': False, 
     'shift': False, 
     'ctrl': False,
+    'alt': False,
     'mouse_grabbed': False,
     'last_trigger': 0,
     'vm_pressed': set(),      # Buttons currently down on virtual mouse
@@ -87,6 +90,22 @@ def active_window_class():
     except:
         pass
     return ''
+
+def write_modifier_state():
+    tmp_path = MODIFIER_STATE_FILE + '.tmp'
+    try:
+        with open(tmp_path, 'w', encoding='utf-8') as handle:
+            handle.write(f"META={'1' if state['meta'] else '0'}\n")
+            handle.write(f"SHIFT={'1' if state['shift'] else '0'}\n")
+            handle.write(f"CTRL={'1' if state['ctrl'] else '0'}\n")
+            handle.write(f"ALT={'1' if state['alt'] else '0'}\n")
+        os.replace(tmp_path, MODIFIER_STATE_FILE)
+    except Exception:
+        try:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        except Exception:
+            pass
 
 def tap_alt_arrow(keyboard_ui, arrow_code):
     if keyboard_ui is None:
@@ -191,7 +210,10 @@ def keyboard_worker(kb, mice_with_uis):
                     state['shift'] = (event.value > 0)
                 elif event.code in [ecodes.KEY_LEFTCTRL, ecodes.KEY_RIGHTCTRL]:
                     state['ctrl'] = (event.value > 0)
+                elif event.code in [ecodes.KEY_LEFTALT, ecodes.KEY_RIGHTALT]:
+                    state['alt'] = (event.value > 0)
 
+                write_modifier_state()
                 update_mouse_grab_state(mice_with_uis)
     except Exception as e:
         print(f"Keyboard worker error: {e}", file=sys.stderr)
@@ -275,6 +297,7 @@ def mouse_worker(mouse, ui, keyboard_ui, mice_with_uis):
         os._exit(75)
 
 def main():
+    write_modifier_state()
     keyboards, mice = wait_for_devices()
     keyboard_ui = None
     mice_with_uis = []

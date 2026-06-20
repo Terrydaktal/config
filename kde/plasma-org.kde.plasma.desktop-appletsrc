@@ -21,6 +21,10 @@ wallpaperplugin=org.kde.image
 DialogHeight=630
 DialogWidth=810
 
+[Containments][1][Wallpaper][org.kde.image][General]
+Image=file:///home/lewis/.local/share/wallpapers/Breeze-6.6/
+SlidePaths=/home/lewis/.local/share/wallpapers/,/usr/share/wallpapers/
+
 [Containments][2]
 activityId=
 formfactor=2
@@ -170,7 +174,7 @@ DialogWidth=810
 
 [Containments][26][Applets][27][Configuration][General]
 fill=false
-launchers=applications:xfce4-terminal.desktop,preferred://filemanager,applications:org.xfce.mousepad.desktop,applications:firefox.desktop,preferred://browser,applications:org.telegram.desktop.desktop
+launchers=applications:xfce4-terminal.desktop,preferred://filemanager,applications:org.xfce.mousepad.desktop,applications:firefox.desktop,applications:org.telegram.desktop.desktop,preferred://browser,applications:org.coolercontrol.CoolerControl.desktop
 
 [Containments][26][General]
 AppletOrder=27

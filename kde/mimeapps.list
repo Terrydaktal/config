@@ -23,6 +23,7 @@ text/x-log=org.xfce.mousepad.desktop;
 text/x-patch=org.xfce.mousepad.desktop;
 text/xml=org.xfce.mousepad.desktop;
 
+x-scheme-handler/unearth-dolphin-select=unearth-dolphin-select.desktop;
 [Default Applications]
 application/config=org.xfce.mousepad.desktop;
 application/octet-stream=org.xfce.mousepad.desktop;
@@ -51,5 +52,6 @@ text/xml=org.xfce.mousepad.desktop;
 x-scheme-handler/http=google-chrome.desktop
 x-scheme-handler/https=google-chrome.desktop
 
+x-scheme-handler/unearth-dolphin-select=unearth-dolphin-select.desktop
 [Removed Associations]
 text/markdown=libreoffice-writer.desktop;

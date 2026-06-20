@@ -3,6 +3,7 @@ set -euo pipefail
 
 runtime="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export YDOTOOL_SOCKET="${YDOTOOL_SOCKET:-$runtime/.ydotool_socket}"
+modifier_state_file="${WAYLAND_MODIFIER_STATE_FILE:-$runtime/wayland_modifier_state.env}"
 
 lock="$runtime/copyq-ydotool-paste.lock"
 exec 9>"$lock"
@@ -33,9 +34,20 @@ ensure_ydotoold() {
     return 4
 }
 
+modifier_held() {
+    [[ -f "$modifier_state_file" ]] || return 1
+    # shellcheck disable=SC1090
+    source "$modifier_state_file"
+    [[ "${META:-0}" == "1" || "${SHIFT:-0}" == "1" || "${CTRL:-0}" == "1" || "${ALT:-0}" == "1" ]]
+}
+
 trap release_keys EXIT
 
 ensure_ydotoold
+if modifier_held; then
+    printf 'copyq-wayland-paste: refusing to paste because a modifier key is currently held\n' >&2
+    exit 5
+fi
 release_keys
 
 # Give CopyQ a moment to hide and return focus to the previous window.

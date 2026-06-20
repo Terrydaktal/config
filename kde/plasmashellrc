@@ -5,6 +5,7 @@ Number of Actions=0
 alignment=2
 floating=0
 panelLengthMode=2
+shell=org.kde.plasma.desktop
 
 [PlasmaViews][Panel 2][Defaults]
 maxLength=858
@@ -25,6 +26,7 @@ alignment=132
 floating=0
 panelLengthMode=1
 panelVisibility=1
+shell=org.kde.plasma.desktop
 
 [PlasmaViews][Panel 26][Defaults]
 maxLength=1504
