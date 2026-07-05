@@ -52,21 +52,21 @@ if status is-interactive
     function __restore_ibeam_cursor --on-event fish_prompt; test -t 1; and builtin printf '\e[6 q'; end
     function clipboard; if not isatty stdin; fish_clipboard_copy; else if count $argv > /dev/null; fish_clipboard_copy < $argv[1]; else; echo "Usage: cat file | clipboard  OR  clipboard filename"; end; end
     function smart_ctrl_backspace; set -l c (commandline); if test -n "$c"; commandline -f backward-kill-word; end; end
-    function smart_ctrl_up; set -l c (commandline); set -l current_token (commandline -t); set -l search_dir "$PWD"; set -l token_path "$current_token"; if string match -rq '^~($|/)' -- "$token_path"; set token_path (string replace -r '^~' "$HOME" -- "$token_path"); end; if test -n "$current_token"; if test -d "$token_path"; set search_dir "$token_path"; else; set -l parent (path dirname -- "$token_path" 2>/dev/null); if test -d "$parent"; set search_dir "$parent"; end; end; end; set -l r; switch "$c"; case 'cd*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -d -H --color=never "$search_dir"); case 'nano*' 'cat*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -f -H --color=never "$search_dir"); case '*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -H --color=never "$search_dir"); end; if test -n "$r"; if test -n "$current_token"; commandline -t -- (string escape -- "$r"); else; commandline -i (string escape -- "$r"); end; end; commandline -f repaint; end
-    function smart_prevd; prevd; commandline -f repaint; end
-    function smart_nextd; nextd; commandline -f repaint; end
-    functions -e __zoxide_auto_report 2>/dev/null; function __zoxide_auto_report --on-event fish_postexec; zoxide add "$PWD"; for a in (commandline --input="$argv[1]" --tokens-expanded 2>/dev/null); set -l p (path resolve -- "$a" 2>/dev/null); if test -n "$p"; and test -d "$p"; zoxide add "$p"; else if test -n "$p"; and test -e "$p"; zoxide add (path dirname -- "$p"); end; end; end
-    function smart_enter; commandline -f execute; end
+	    function smart_ctrl_up; set -l c (commandline); set -l current_token (commandline -t); set -l search_dir "$PWD"; set -l token_path "$current_token"; if string match -rq '^~($|/)' -- "$token_path"; set token_path (string replace -r '^~' "$HOME" -- "$token_path"); end; if test -n "$current_token"; if test -d "$token_path"; set search_dir "$token_path"; else; set -l parent (path dirname -- "$token_path" 2>/dev/null); if test -d "$parent"; set search_dir "$parent"; end; end; end; set -l r; switch "$c"; case 'cd*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -d -H --color=never "$search_dir"); case 'nano*' 'cat*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -f -H --color=never "$search_dir"); case '*'; set r (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -H --color=never "$search_dir"); end; if test -n "$r"; if test -n "$current_token"; commandline -t -- (string escape -- "$r"); else; commandline -i (string escape -- "$r"); end; end; commandline -f repaint; end
+	    function smart_prevd; prevd; commandline -f repaint; end
+	    function smart_nextd; nextd; commandline -f repaint; end
+	    functions -e __zoxide_auto_report 2>/dev/null; function __zoxide_auto_report --on-event fish_postexec; zoxide add "$PWD"; for a in (commandline --input="$argv[1]" --tokens-expanded 2>/dev/null); set -l p (path resolve -- "$a" 2>/dev/null); if test -n "$p"; and test -d "$p"; zoxide add "$p"; else if test -n "$p"; and test -e "$p"; zoxide add (path dirname -- "$p"); end; end; end
+	    function smart_enter; commandline -f execute; end
     function codex; command codex $argv; end
     function xfce_click_handler; set -l marker "__XFCE_CLICK__:"; set -l buf (commandline -b); set -l trimmed (string trim -- "$buf"); if not string match -q "*$marker*" -- "$trimmed"; commandline -f repaint; return; end; set -l clicked (string replace -r "^.*$marker" "" "$trimmed"); set clicked (string trim -- "$clicked"); set clicked (string replace -a '\x1f' '' "$clicked"); set clicked (string replace -r '[[:cntrl:]]+' '' "$clicked"); set clicked (string replace -r '^--[[:space:]]+' "" "$clicked"); set -l before_marker (string replace -r "$marker.*\$" "" "$trimmed"); set before_marker (string replace -r '^--[[:space:]]+' "" -- (string trim -- "$before_marker")); if test -d "$clicked"; and test -z "$before_marker"; __zoxide_cd -- "$clicked"; commandline -r -- ""; commandline -f repaint; return; end; set -l cleaned (string replace -a $marker "" "$trimmed"); set cleaned (string replace -a '\x1f' '' "$cleaned"); set cleaned (string replace -r '[[:cntrl:]]+' '' "$cleaned"); set cleaned (string replace -r '^--[[:space:]]+' "" "$cleaned"); commandline -r -- "$cleaned"; commandline -f repaint; end
 
     # Binds
     bind --erase \r
-    bind -M insert \r smart_enter
-    bind -M default \r smart_enter
-    bind -M insert \x1f xfce_click_handler
-    bind -M default \x1f xfce_click_handler
-    bind \e\[1\;5A smart_ctrl_up
+	    bind -M insert \r smart_enter
+	    bind -M default \r smart_enter
+	    bind -M insert \x1f xfce_click_handler
+	    bind -M default \x1f xfce_click_handler
+	    bind \e\[1\;5A smart_ctrl_up
     bind -M insert \e\[1\;3D smart_prevd
     bind -M insert \e\[1\;3C smart_nextd
     bind -M default \e\[1\;3D smart_prevd

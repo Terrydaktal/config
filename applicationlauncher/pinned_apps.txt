@@ -15,3 +15,4 @@
 /home/lewis/.local/share/applications/xfce4-terminal.desktop
 /home/lewis/.local/share/applications/com.github.hluk.copyq.desktop
 /usr/share/applications/virt-manager.desktop
+/usr/share/applications/gimp.desktop

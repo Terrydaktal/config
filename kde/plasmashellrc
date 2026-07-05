@@ -9,9 +9,12 @@ shell=org.kde.plasma.desktop
 
 [PlasmaViews][Panel 2][Defaults]
 maxLength=858
-minLength=372
+minLength=285
 offset=0
-thickness=46
+thickness=44
+
+[PlasmaViews][Panel 2][Horizontal3339]
+minLength=285
 
 [PlasmaViews][Panel 2][Horizontal3440]
 alignment=132

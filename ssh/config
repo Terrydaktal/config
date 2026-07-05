@@ -1,0 +1,42 @@
+#knowthatstuff and dictai
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+Host knowthatstuff
+    HostName 23.94.221.195
+    User root
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+Host knowthatstuff-lewis
+    HostName 23.94.221.195
+    User lewis
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+Host swiftsay
+    HostName 172.245.184.223
+    User root
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+Host swiftsay-lewis
+    HostName 172.245.184.223
+    User lewis
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+Host wordelites
+    HostName 82.165.221.121
+    User root
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+Host wordelites-lewis
+    HostName 82.165.221.121
+    User lewis
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+

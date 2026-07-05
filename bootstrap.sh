@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Script to set up symlinks for configuration files tracked in ~/Dev/config
+# Bootstrap script to set up symlinks and enable/start systemd services
 
 REPO_DIR="$HOME/Dev/config"
 
@@ -118,6 +118,10 @@ migrate_and_link "~/.gitconfig" "$REPO_DIR/git/gitconfig"
 # CopyQ autostart
 migrate_and_link "~/.config/autostart/com.github.hluk.copyq.desktop" "$REPO_DIR/autostart/com.github.hluk.copyq.desktop"
 
+# Import environment autostart
+migrate_and_link "~/.config/autostart/import-environment.desktop" "$REPO_DIR/autostart/import-environment.desktop"
+
+
 # Systemd user units (already in repo)
 migrate_and_link "~/.config/systemd/user/wayland-scroll-daemon.service" "$REPO_DIR/systemd/user/wayland-scroll-daemon.service"
 migrate_and_link "~/.config/systemd/user/xremap-meta-keyboard.service" "$REPO_DIR/systemd/user/xremap-meta-keyboard.service"
@@ -125,6 +129,10 @@ migrate_and_link "~/.config/systemd/user/xremap-meta-keyboard.service" "$REPO_DI
 # New systemd user unit & helper script
 migrate_and_link "~/.config/systemd/user/kde-refresh-powerdevil-after-lock.service" "$REPO_DIR/systemd/user/kde-refresh-powerdevil-after-lock.service"
 migrate_and_link "~/.local/bin/kde-refresh-powerdevil-after-lock" "$REPO_DIR/systemd/user/kde-refresh-powerdevil-after-lock"
+
+# SSH user configs
+migrate_and_link "~/.ssh/config" "$REPO_DIR/ssh/config"
+migrate_and_link "~/.ssh/authorized_keys" "$REPO_DIR/ssh/authorized_keys"
 
 echo -e "\n=== 3. Tracking system files (Copy Only) ==="
 # Track NetworkManager connectivity check config
@@ -169,8 +177,83 @@ else
     echo "⚠ /etc/systemd/system/nvidia-power-limit.service not found"
 fi
 
+# Track custom UFW configuration
+mkdir -p "$REPO_DIR/etc/ufw"
+ufw_files=(
+    "ufw.conf"
+    "user.rules"
+    "user6.rules"
+)
+for f in "${ufw_files[@]}"; do
+    if [ -f "/etc/ufw/$f" ]; then
+        cp "/etc/ufw/$f" "$REPO_DIR/etc/ufw/$f"
+        echo "✔ Copied /etc/ufw/$f to repo"
+    else
+        echo "⚠ /etc/ufw/$f not found"
+    fi
+done
+
+# Track custom SSH daemon configuration
+mkdir -p "$REPO_DIR/etc/ssh/sshd_config.d"
+if [ -f "/etc/ssh/sshd_config.d/port34567.conf" ]; then
+    cp "/etc/ssh/sshd_config.d/port34567.conf" "$REPO_DIR/etc/ssh/sshd_config.d/port34567.conf"
+    echo "✔ Copied /etc/ssh/sshd_config.d/port34567.conf to repo"
+else
+    echo "⚠ /etc/ssh/sshd_config.d/port34567.conf not found"
+fi
+
 echo -e "\n=== 4. Reloading systemd user manager ==="
 systemctl --user daemon-reload
 echo "✔ Reloaded systemd user daemon"
 
-echo -e "\n★ Migration complete! Please verify with 'git status' in ~/Dev/config."
+echo -e "\n=== 5. Enabling systemd user services ==="
+for svc in wayland-scroll-daemon.service xremap-meta-keyboard.service kde-refresh-powerdevil-after-lock.service ydotool.service; do
+    if systemctl --user is-enabled "$svc" &>/dev/null; then
+        echo "✔ User service is already enabled: $svc"
+    elif systemctl --user list-unit-files "$svc" &>/dev/null; then
+        echo "Enabling user service: $svc"
+        systemctl --user enable "$svc"
+    else
+        echo "⚠ User service not found, skipping: $svc"
+    fi
+done
+
+echo -e "\n=== 6. Enabling systemd system services ==="
+if systemctl is-enabled systemd-timesyncd.service &>/dev/null; then
+    echo "✔ System service is already enabled: systemd-timesyncd"
+elif systemctl list-unit-files systemd-timesyncd.service &>/dev/null; then
+    echo "Enabling system service: systemd-timesyncd"
+    sudo systemctl enable --now systemd-timesyncd.service
+else
+    echo "⚠ systemd-timesyncd.service not found, skipping"
+fi
+
+if systemctl is-enabled nvidia-power-limit.service &>/dev/null; then
+    echo "✔ System service is already enabled: nvidia-power-limit"
+elif [ -f "/etc/systemd/system/nvidia-power-limit.service" ]; then
+    echo "Enabling system service: nvidia-power-limit"
+    sudo systemctl enable nvidia-power-limit.service
+else
+    echo "⚠ nvidia-power-limit.service not found, skipping"
+fi
+
+if systemctl is-enabled ufw.service &>/dev/null; then
+    echo "✔ System service is already enabled: ufw"
+elif systemctl list-unit-files ufw.service &>/dev/null; then
+    echo "Enabling system service: ufw"
+    sudo systemctl enable --now ufw.service
+else
+    echo "⚠ ufw.service not found, skipping"
+fi
+
+if systemctl is-enabled sshd.service &>/dev/null; then
+    echo "✔ System service is already enabled: sshd"
+elif systemctl list-unit-files sshd.service &>/dev/null; then
+    echo "Enabling system service: sshd"
+    sudo systemctl enable --now sshd.service
+else
+    echo "⚠ sshd.service not found, skipping"
+fi
+
+
+echo -e "\n★ Bootstrap complete! Please verify with 'git status' in ~/Dev/config."

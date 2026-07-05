@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Import Graphical Environment to systemd/dbus
+Exec=dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-StartupNotify=false
