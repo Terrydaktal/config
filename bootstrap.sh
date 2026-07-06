@@ -198,7 +198,7 @@ done
 
 # Track custom SSH daemon configuration
 mkdir -p "$REPO_DIR/etc/ssh/sshd_config.d"
-for conf in port34567.conf 50-security.conf; do
+for conf in port34567.conf 99-security.conf; do
     if [ -f "/etc/ssh/sshd_config.d/$conf" ]; then
         cp "/etc/ssh/sshd_config.d/$conf" "$REPO_DIR/etc/ssh/sshd_config.d/$conf"
         echo "✔ Copied /etc/ssh/sshd_config.d/$conf to repo"
