@@ -121,6 +121,9 @@ migrate_and_link "~/.config/autostart/com.github.hluk.copyq.desktop" "$REPO_DIR/
 # Import environment autostart
 migrate_and_link "~/.config/autostart/import-environment.desktop" "$REPO_DIR/autostart/import-environment.desktop"
 
+# Mousepad desktop override launcher
+migrate_and_link "~/.local/share/applications/org.xfce.mousepad.desktop" "$REPO_DIR/applications/org.xfce.mousepad.desktop"
+
 
 # Systemd user units (already in repo)
 migrate_and_link "~/.config/systemd/user/wayland-scroll-daemon.service" "$REPO_DIR/systemd/user/wayland-scroll-daemon.service"
