@@ -198,12 +198,14 @@ done
 
 # Track custom SSH daemon configuration
 mkdir -p "$REPO_DIR/etc/ssh/sshd_config.d"
-if [ -f "/etc/ssh/sshd_config.d/port34567.conf" ]; then
-    cp "/etc/ssh/sshd_config.d/port34567.conf" "$REPO_DIR/etc/ssh/sshd_config.d/port34567.conf"
-    echo "✔ Copied /etc/ssh/sshd_config.d/port34567.conf to repo"
-else
-    echo "⚠ /etc/ssh/sshd_config.d/port34567.conf not found"
-fi
+for conf in port34567.conf 50-security.conf; do
+    if [ -f "/etc/ssh/sshd_config.d/$conf" ]; then
+        cp "/etc/ssh/sshd_config.d/$conf" "$REPO_DIR/etc/ssh/sshd_config.d/$conf"
+        echo "✔ Copied /etc/ssh/sshd_config.d/$conf to repo"
+    else
+        echo "⚠ /etc/ssh/sshd_config.d/$conf not found"
+    fi
+done
 
 echo -e "\n=== 4. Reloading systemd user manager ==="
 systemctl --user daemon-reload
