@@ -137,6 +137,19 @@ migrate_and_link "~/.local/bin/kde-refresh-powerdevil-after-lock" "$REPO_DIR/sys
 migrate_and_link "~/.ssh/config" "$REPO_DIR/ssh/config"
 migrate_and_link "~/.ssh/authorized_keys" "$REPO_DIR/ssh/authorized_keys"
 
+# Firefox user.js
+FIREFOX_PROFILES_DIR="$HOME/.config/mozilla/firefox"
+if [ -f "$FIREFOX_PROFILES_DIR/profiles.ini" ]; then
+    FF_PROFILE=$(awk -F= '/^Default=/ { print $2; exit }' "$FIREFOX_PROFILES_DIR/profiles.ini")
+    if [ -n "$FF_PROFILE" ]; then
+        migrate_and_link "$FIREFOX_PROFILES_DIR/$FF_PROFILE/user.js" "$REPO_DIR/firefox/user.js"
+    else
+        echo "⚠ Could not determine Firefox default profile from profiles.ini"
+    fi
+else
+    echo "⚠ Firefox profiles.ini not found, skipping user.js symlink"
+fi
+
 echo -e "\n=== 3. Tracking system files (Copy Only) ==="
 # Track NetworkManager connectivity check config
 mkdir -p "$REPO_DIR/etc/NetworkManager/conf.d"
@@ -161,6 +174,7 @@ mkdir -p "$REPO_DIR/etc/udev/rules.d"
 udev_rules=(
     "99-hdd-scheduler.rules"
     "99-xremap.rules"
+    "99-kwin-reinit-on-hotplug.rules"
 )
 for rule in "${udev_rules[@]}"; do
     if [ -f "/etc/udev/rules.d/$rule" ]; then
