@@ -138,9 +138,21 @@ migrate_and_link "~/.ssh/config" "$REPO_DIR/ssh/config"
 migrate_and_link "~/.ssh/authorized_keys" "$REPO_DIR/ssh/authorized_keys"
 
 # Firefox user.js
+# profiles.ini has a random prefix per installation (e.g. nbw40052.default-release).
+# We read the Default= key from the [Install*] section (set when Firefox first runs)
+# and fall back to Path= from [Profile0] for fresh installs that lack [Install*].
 FIREFOX_PROFILES_DIR="$HOME/.config/mozilla/firefox"
 if [ -f "$FIREFOX_PROFILES_DIR/profiles.ini" ]; then
-    FF_PROFILE=$(awk -F= '/^Default=/ { print $2; exit }' "$FIREFOX_PROFILES_DIR/profiles.ini")
+    FF_PROFILE=$(awk -F= '
+        /^\[Install/       { in_install=1 }
+        /^\[/              { if (!in_install) in_install=0 }
+        in_install && /^Default=/ { print $2; found=1; exit }
+        END { if (!found) { } }
+    ' "$FIREFOX_PROFILES_DIR/profiles.ini")
+    # Fallback: read Path= from [Profile0] for fresh installs
+    if [ -z "$FF_PROFILE" ]; then
+        FF_PROFILE=$(awk -F= '/^Path=/ { print $2; exit }' "$FIREFOX_PROFILES_DIR/profiles.ini")
+    fi
     if [ -n "$FF_PROFILE" ]; then
         migrate_and_link "$FIREFOX_PROFILES_DIR/$FF_PROFILE/user.js" "$REPO_DIR/firefox/user.js"
     else
