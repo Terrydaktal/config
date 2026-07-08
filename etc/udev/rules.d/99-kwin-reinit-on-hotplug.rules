@@ -1,0 +1,4 @@
+# Reinitialise the KWin compositor whenever a DRM output is hotplugged or unplugged.
+# This forces KWin to release GPU buffers for any monitor that is no longer connected,
+# preventing stale VRAM allocations from lingering between monitor switches.
+ACTION=="change", SUBSYSTEM=="drm", RUN+="/usr/bin/systemd-run --uid=1000 -E DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /usr/bin/qdbus6 org.kde.KWin /Compositor org.kde.kwin.Compositing.reinitialize"
