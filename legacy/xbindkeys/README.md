@@ -4,9 +4,9 @@ This directory now holds only the legacy X11 `xbindkeys` configuration and helpe
 
 ## Files
 
-- `legacy/.xbindkeysrc`: old X11 `xbindkeys` config.
-- `legacy/meta-wheel-minimize`: X11 helper using `xdotool`.
-- `legacy/meta-wheel-restore`: X11 helper using `wmctrl`.
+- `.xbindkeysrc`: old X11 `xbindkeys` config.
+- `meta-wheel-minimize`: X11 helper using `xdotool`.
+- `meta-wheel-restore`: X11 helper using `wmctrl`.
 
 ## Current Stack
 

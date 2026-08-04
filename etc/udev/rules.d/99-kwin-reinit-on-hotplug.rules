@@ -1,4 +1,7 @@
-# Reinitialise the KWin compositor whenever a DRM output is hotplugged or unplugged.
-# This forces KWin to release GPU buffers for any monitor that is no longer connected,
-# preventing stale VRAM allocations from lingering between monitor switches.
-ACTION=="change", SUBSYSTEM=="drm", RUN+="/usr/bin/systemd-run --uid=1000 -E DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /usr/bin/qdbus6 org.kde.KWin /Compositor org.kde.kwin.Compositing.reinitialize"
+# Reinitialize KWin once, and only when the connected monitor identity changes.
+#
+# NVIDIA DRM can emit several HOTPLUG change events while a DisplayPort monitor
+# wakes. A fixed transient unit coalesces that event burst. The helper adds a
+# lock, waits for a stable KScreen UUID, and ignores wake events for the same
+# monitor before asking KWin to release and recreate its compositor buffers.
+ACTION=="change", SUBSYSTEM=="drm", ENV{HOTPLUG}=="1", RUN+="/usr/bin/systemd-run --quiet --collect --unit=kwin-monitor-change-reinit --uid=1000 --setenv=HOME=/home/lewis --setenv=XDG_RUNTIME_DIR=/run/user/1000 --setenv=XDG_CACHE_HOME=/home/lewis/.cache --setenv=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus --setenv=WAYLAND_DISPLAY=wayland-0 --setenv=QT_QPA_PLATFORM=wayland /usr/local/bin/kwin-monitor-change-reinit"

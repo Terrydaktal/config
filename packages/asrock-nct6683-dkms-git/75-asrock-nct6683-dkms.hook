@@ -1,0 +1,13 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = linux-cachyos
+Target = linux-cachyos-headers
+Target = linux-cachyos-lts
+Target = linux-cachyos-lts-headers
+
+[Action]
+Description = Rebuilding and verifying ASRock NCT6683 DKMS fan control
+When = PostTransaction
+Exec = /usr/lib/asrock-nct6683/verify-dkms

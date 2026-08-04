@@ -7,12 +7,10 @@ stack=/tmp/min_stack
 mkdir "$lock" 2>/dev/null || exit 0
 trap 'rmdir "$lock" 2>/dev/null || true' EXIT
 
-if [[ -s "$stack" ]]; then
-    wid=$(tail -n 1 "$stack")
-    if [[ -n ${wid:-} ]]; then
-        wmctrl -i -R "$wid"
-        sed -i '$d' "$stack"
-    fi
+wid=$(xdotool getmouselocation --shell | awk -F= '$1 == "WINDOW" { print $2 }')
+if [[ -n ${wid:-} ]]; then
+	printf '%s\n' "$wid" >>"$stack"
+	xdotool windowminimize "$wid"
 fi
 
 sleep 0.3

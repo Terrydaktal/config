@@ -9,6 +9,7 @@ ItemGeometries-2259x1271=
 ItemGeometries-3339x1878=
 ItemGeometries-3440x1440=
 ItemGeometries-5120x2160=
+ItemGeometries-640x480=
 ItemGeometries-800x600=
 ItemGeometriesHorizontal=
 activityId=714198cd-af77-45a5-bc50-082fd5abe07e
@@ -145,6 +146,10 @@ plugin=org.kde.plasma.brightness
 immutability=1
 plugin=org.kde.plasma.mediacontroller
 
+[Containments][2][Applets][7][Applets][28]
+immutability=1
+plugin=org.kde.plasma.bluetooth
+
 [Containments][2][Applets][7][Applets][8]
 immutability=1
 plugin=org.kde.plasma.vault
@@ -154,7 +159,7 @@ immutability=1
 plugin=org.kde.plasma.notifications
 
 [Containments][2][Applets][7][General]
-extraItems=org.kde.plasma.vault,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.clipboard,org.kde.plasma.cameraindicator,org.kde.plasma.keyboardindicator,org.kde.plasma.battery,org.kde.plasma.brightness,org.kde.plasma.mediacontroller,org.kde.plasma.printmanager,org.kde.plasma.keyboardlayout,org.kde.plasma.weather,org.kde.plasma.networkmanagement,org.kde.plasma.manage-inputmethod,org.kde.plasma.devicenotifier,org.kde.kscreen,org.kde.plasma.bluetooth
+extraItems=org.kde.plasma.vault,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.cameraindicator,org.kde.plasma.keyboardindicator,org.kde.plasma.battery,org.kde.plasma.brightness,org.kde.plasma.mediacontroller,org.kde.plasma.printmanager,org.kde.plasma.keyboardlayout,org.kde.plasma.weather,org.kde.plasma.networkmanagement,org.kde.plasma.manage-inputmethod,org.kde.plasma.devicenotifier,org.kde.kscreen,org.kde.plasma.bluetooth
 knownItems=org.kde.plasma.vault,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.clipboard,org.kde.plasma.cameraindicator,org.kde.plasma.keyboardindicator,org.kde.plasma.battery,org.kde.plasma.brightness,org.kde.plasma.mediacontroller,org.kde.plasma.printmanager,org.kde.plasma.keyboardlayout,org.kde.plasma.weather,org.kde.plasma.networkmanagement,org.kde.plasma.manage-inputmethod,org.kde.plasma.devicenotifier,org.kde.kscreen,org.kde.plasma.bluetooth
 
 [Containments][2][General]
@@ -186,4 +191,4 @@ AppletOrder=27
 
 [ScreenMapping]
 itemsOnDisabledScreens=
-screenMapping=desktop:/boot,0,714198cd-af77-45a5-bc50-082fd5abe07e,desktop:/backups,0,714198cd-af77-45a5-bc50-082fd5abe07e
+screenMapping=desktop:/backups,0,714198cd-af77-45a5-bc50-082fd5abe07e,desktop:/boot,0,714198cd-af77-45a5-bc50-082fd5abe07e

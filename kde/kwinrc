@@ -6,6 +6,9 @@ Rows=1
 [Effect-overview]
 BorderActivate=9
 
+[Effect-xfceterminalscale]
+Scale=1.25
+
 [MouseBindings]
 CommandAll1=Move
 CommandAllWheel=Nothing
@@ -13,9 +16,12 @@ Modifier=Meta
 
 [Plugins]
 applicationlauncher-window-feedEnabled=true
+dictai-popup-guardEnabled=true
+dictai-positionerEnabled=true
 magiclampEnabled=true
 squashEnabled=false
 wobblywindowsEnabled=true
+xfceterminalscaleEnabled=false
 zoomEnabled=true
 
 [Tiling][068353db-b73c-45d9-b9dc-f144ccf93136][]
@@ -23,6 +29,10 @@ padding=4
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 
 [Tiling][068353db-b73c-45d9-b9dc-f144ccf93136][106c7a35-741a-4adc-9083-0200db306377]
+padding=4
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+
+[Tiling][068353db-b73c-45d9-b9dc-f144ccf93136][6d94aa63-396b-40c3-8c08-30b9add41048]
 padding=4
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 

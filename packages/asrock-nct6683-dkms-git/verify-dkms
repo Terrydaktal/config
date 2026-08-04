@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+set -u -o pipefail
+
+module_name='asrock-nct6683'
+overall_status=0
+
+printf '\n*** ASRock NCT6683 DKMS verification ***\n'
+
+if ! /usr/bin/dkms autoinstall; then
+	printf '*** WARNING: dkms autoinstall reported a failure. ***\n'
+	overall_status=1
+fi
+
+shopt -s nullglob
+driver_configs=(/usr/src/asrock-nct6683-*/dkms.conf)
+if ((${#driver_configs[@]} == 0)); then
+	printf '*** FAILURE: no installed %s dkms.conf was found. ***\n' "$module_name"
+	exit 1
+fi
+
+declare -A config_for_version=()
+versions=()
+for config in "${driver_configs[@]}"; do
+	unset PACKAGE_NAME PACKAGE_VERSION
+	# This file is installed by the package and contains only DKMS assignments.
+	# shellcheck source=/dev/null
+	. "$config"
+	if [[ ${PACKAGE_NAME:-} = "$module_name" && ${PACKAGE_VERSION:-} ]]; then
+		config_for_version["$PACKAGE_VERSION"]="$config"
+		versions+=("$PACKAGE_VERSION")
+	fi
+done
+
+if ((${#versions[@]} == 0)); then
+	printf '*** FAILURE: no valid %s DKMS registration was found. ***\n' "$module_name"
+	exit 1
+fi
+
+latest_version=$(printf '%s\n' "${versions[@]}" | /usr/bin/sort -V | /usr/bin/tail -n 1)
+unset PACKAGE_NAME PACKAGE_VERSION
+# shellcheck source=/dev/null
+. "${config_for_version[$latest_version]}"
+
+printf 'Using %s/%s\n' "$PACKAGE_NAME" "$PACKAGE_VERSION"
+
+kernel_dirs=(/usr/lib/modules/*)
+found_kernel=0
+for kernel_dir in "${kernel_dirs[@]}"; do
+	[[ -f "$kernel_dir/pkgbase" ]] || continue
+	pkgbase=$(<"$kernel_dir/pkgbase")
+	[[ $pkgbase = linux-cachyos* ]] || continue
+	found_kernel=1
+	kernel_version=${kernel_dir##*/}
+
+	printf 'Checking kernel %s...\n' "$kernel_version"
+	if ! /usr/bin/dkms install \
+		-m "$PACKAGE_NAME" \
+		-v "$PACKAGE_VERSION" \
+		-k "$kernel_version"; then
+		printf '*** FAILURE: DKMS install failed for %s. ***\n' "$kernel_version"
+		overall_status=1
+		continue
+	fi
+
+	module_path=$(/usr/bin/modinfo -k "$kernel_version" -n nct6683 2>/dev/null || true)
+	case "$module_path" in
+	*/updates/dkms/nct6683.ko | */updates/dkms/nct6683.ko.*)
+		printf 'OK: %s\n' "$module_path"
+		;;
+	*)
+		printf '*** FAILURE: %s resolves to %s, not updates/dkms/nct6683.ko. ***\n' \
+			"$kernel_version" "${module_path:-<not found>}"
+		overall_status=1
+		;;
+	esac
+done
+
+if ((found_kernel == 0)); then
+	printf '*** FAILURE: no installed linux-cachyos kernel was found. ***\n'
+	overall_status=1
+fi
+
+if ((overall_status == 0)); then
+	printf '*** ASRock NCT6683 DKMS verification passed. ***\n'
+else
+	printf '*** ASRock NCT6683 DKMS verification FAILED. Fix before rebooting. ***\n'
+fi
+
+exit "$overall_status"

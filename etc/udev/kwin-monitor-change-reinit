@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+set -u
+
+readonly log_tag="kwin-monitor-reinit"
+readonly runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+readonly state_dir="${KWIN_MONITOR_STATE_DIR:-${XDG_CACHE_HOME:-${HOME}/.cache}/kwin-monitor-reinit}"
+readonly state_file="${state_dir}/connected-displays"
+readonly lock_file="${runtime_dir}/kwin-monitor-reinit.lock"
+
+log_message() {
+	/usr/bin/logger --tag "${log_tag}" -- "$*"
+}
+
+read_connected_displays() {
+	local output
+
+	if ! output=$(/usr/bin/timeout 8 /usr/bin/kscreen-doctor --outputs 2>/dev/null); then
+		return 1
+	fi
+
+	# Each Output line ends with KWin's monitor UUID. Including the connector
+	# name makes the fingerprint sensitive to both monitor and port changes.
+	printf '%s\n' "${output}" |
+		/usr/bin/sed -E $'s/\x1B\\[[0-9;]*[mK]//g' |
+		/usr/bin/awk '$1 == "Output:" && NF >= 4 { print $3 ":" $4 }' |
+		LC_ALL=C /usr/bin/sort -u
+}
+
+fingerprint_for_log() {
+	printf '%s' "$1" | /usr/bin/tr '\n' ','
+}
+
+/usr/bin/mkdir -p "${runtime_dir}" "${state_dir}"
+exec 9>"${lock_file}"
+
+# The fixed systemd unit in the udev rule provides the first serialization
+# layer. Keep a lock too, so manual or unexpected parallel starts are harmless.
+if ! /usr/bin/flock --nonblock 9; then
+	exit 0
+fi
+
+# DRM hotplug notifications arrive in bursts and may briefly report no output.
+# Require the same non-empty fingerprint twice before acting.
+/usr/bin/sleep 2
+previous_sample=""
+stable_fingerprint=""
+
+for _attempt in {1..10}; do
+	current_sample="$(read_connected_displays || true)"
+
+	if [[ -n "${current_sample}" && "${current_sample}" == "${previous_sample}" ]]; then
+		stable_fingerprint="${current_sample}"
+		break
+	fi
+
+	previous_sample="${current_sample}"
+	/usr/bin/sleep 1
+done
+
+if [[ -z "${stable_fingerprint}" ]]; then
+	log_message "Skipped compositor reinitialization: no stable connected display was detected"
+	exit 0
+fi
+
+old_fingerprint=""
+if [[ -r "${state_file}" ]]; then
+	old_fingerprint="$(<"${state_file}")"
+fi
+
+if [[ "${stable_fingerprint}" == "${old_fingerprint}" ]]; then
+	log_message "Skipped compositor reinitialization: connected display identity is unchanged ($(fingerprint_for_log "${stable_fingerprint}"))"
+	exit 0
+fi
+
+temporary_state="$(/usr/bin/mktemp "${state_dir}/.connected-displays.XXXXXX")"
+printf '%s\n' "${stable_fingerprint}" >"${temporary_state}"
+/usr/bin/mv "${temporary_state}" "${state_file}"
+
+if [[ -z "${old_fingerprint}" ]]; then
+	log_message "Primed connected display identity without reinitializing KWin ($(fingerprint_for_log "${stable_fingerprint}"))"
+	exit 0
+fi
+
+log_message "Connected display changed from $(fingerprint_for_log "${old_fingerprint}") to $(fingerprint_for_log "${stable_fingerprint}"); reinitializing KWin once"
+
+if [[ "${KWIN_MONITOR_REINIT_DRY_RUN:-0}" == "1" ]]; then
+	log_message "Dry run enabled; compositor reinitialization was not invoked"
+	exit 0
+fi
+
+if ! /usr/bin/qdbus6 org.kde.KWin /Compositor org.kde.kwin.Compositing.reinitialize; then
+	log_message "KWin compositor reinitialization failed"
+	exit 1
+fi
+
+log_message "KWin compositor reinitialization completed"
