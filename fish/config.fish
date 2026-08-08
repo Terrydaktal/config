@@ -41,8 +41,8 @@ if status is-interactive
     alias l 'la'
 
     # Functions
-    function f; unearth -CH -F --color=always --hyperlink $argv; end
-    function ff; unearth "*" -CHl -F --color=always --hyperlink --sort date desc --reverse $argv; end
+    function f; unearth --index-if-watched -CH -F --color=always --hyperlink $argv; end
+    function ff; unearth --index-if-watched "*" -CHl -F --color=always --hyperlink --sort date desc --reverse $argv; end
     function cd; if set -q argv[1]; __zoxide_z $argv; else; set -l t (friz --height 40% --reverse --refresh-source-once --header="Select path" --source unearth --index "*" -d -H --color=never .); test -n "$t"; and if test -d "$t"; __zoxide_z "$t"; else; __zoxide_z (dirname -- "$t"); end; end; end
     function cdi; __zoxide_zi $argv; end
     function mkcd; command mkdir -p -- $argv; and cd -- $argv[1]; end

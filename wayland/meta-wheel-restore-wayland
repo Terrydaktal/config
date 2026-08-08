@@ -1,10 +1,81 @@
 #!/usr/bin/env bash
-KDTOOL="$HOME/.cargo/bin/kdotool"
-stack="${XDG_RUNTIME_DIR:-/tmp}/meta-wheel-min-stack"
-if [[ -s "$stack" ]]; then
-    wid=$(tail -n 1 "$stack")
-    sed -i '$d' "$stack"
-    if [[ -n "$wid" ]]; then
-        $KDTOOL windowstate --remove minimized "$wid" windowactivate "$wid" >/dev/null 2>&1 &
-    fi
+set -euo pipefail
+
+KDTOOL_BIN="${KDTOOL_BIN:-$HOME/.cargo/bin/kdotool}"
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+stack="$runtime_dir/meta-wheel-min-stack"
+lock="$stack.lock"
+window_id_pattern='^\{[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}\}$'
+
+is_window_id() {
+	[[ $1 =~ $window_id_pattern ]]
+}
+
+write_stack() {
+	local temporary_stack
+	temporary_stack=$(mktemp "$runtime_dir/.meta-wheel-min-stack.XXXXXX")
+	trap 'rm -f -- "$temporary_stack"' RETURN
+	if ((${#clean_stack[@]})); then
+		printf '%s\n' "${clean_stack[@]}" >"$temporary_stack"
+	else
+		: >"$temporary_stack"
+	fi
+	mv -f -- "$temporary_stack" "$stack"
+	trap - RETURN
+}
+
+[[ -s $stack ]] || exit 0
+
+exec 9>"$lock"
+flock -x 9
+
+mapfile -t old_stack <"$stack" 2>/dev/null || exit 0
+declare -A seen=()
+reverse_stack=()
+for ((index = ${#old_stack[@]} - 1; index >= 0; index--)); do
+	entry=${old_stack[index]}
+	if is_window_id "$entry" && [[ -z ${seen[$entry]+present} ]]; then
+		seen[$entry]=1
+		reverse_stack+=("$entry")
+	fi
+done
+
+clean_stack=()
+for ((index = ${#reverse_stack[@]} - 1; index >= 0; index--)); do
+	clean_stack+=("${reverse_stack[index]}")
+done
+
+if ((${#clean_stack[@]} == 0)); then
+	write_stack
+	exit 0
 fi
+
+last_index=$((${#clean_stack[@]} - 1))
+wid=${clean_stack[last_index]}
+
+# Retry the lookup briefly so a transient KWin query failure cannot discard a
+# valid window or cause this tick to restore an older stack entry instead.
+window_exists=false
+for _ in 1 2 3; do
+	if "$KDTOOL_BIN" getwindowname "$wid" >/dev/null 2>&1; then
+		window_exists=true
+		break
+	fi
+	sleep 0.02
+done
+
+if [[ $window_exists != true ]]; then
+	unset 'clean_stack[last_index]'
+	write_stack
+	exit 0
+fi
+
+if ! "$KDTOOL_BIN" windowstate --remove MINIMIZED "$wid" >/dev/null 2>&1; then
+	write_stack
+	exit 0
+fi
+
+unset 'clean_stack[last_index]'
+write_stack
+sleep 0.03
+"$KDTOOL_BIN" windowactivate "$wid" >/dev/null 2>&1 || true

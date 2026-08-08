@@ -22,6 +22,28 @@ These scripts are triggered by the daemon and use `kdotool` to interact with KWi
 *   **`meta-wheel-close-wayland`**: Instantly closes the window under the mouse cursor.
 *   **`~/Dev/config/bin/launch-taskbar-app.sh`**: Parses your KDE task manager configuration and launches a **fresh instance** of the application at the specified position.
 
+## KWin Monitor Change Recovery
+
+`etc/udev/kwin-monitor-change-reinit` handles stale KWin compositor state after a monitor wake-up, reboot, or monitor swap. KWin's DRM backend can retain output and framebuffer state from a previous monitor long enough for stale VRAM buffers to be allocated or left attached to the current session.
+
+The udev rule `etc/udev/rules.d/99-kwin-reinit-on-hotplug.rules` starts the helper for DRM hotplug events. The helper:
+
+1. Waits for the hotplug burst to settle and queries `kscreen-doctor --outputs`.
+2. Builds a fingerprint from the connected output connector and KScreen hardware UUID.
+3. Compares that fingerprint with `~/.cache/kwin-monitor-reinit/connected-displays`.
+4. Does nothing when the connected monitor identity is unchanged. On the first observation, it records the fingerprint without restarting KWin.
+5. When the identity changes, asks KWin to tear down and recreate its compositor pipeline with:
+
+   `qdbus6 org.kde.KWin /Compositor org.kde.kwin.Compositing.reinitialize`
+
+This flushes stale display buffers and makes KWin initialize only the monitor that is actually connected. It therefore covers both single-monitor sleep or lock wake-up events and the case where the machine was rebooted with Monitor A connected and then started with Monitor B, or the display input was switched.
+
+## PowerDevil Lock Recovery
+
+`systemd/user/kde-refresh-powerdevil-after-lock` is the helper launched by `kde-refresh-powerdevil-after-lock.service`. It watches KDE's `org.freedesktop.ScreenSaver` D-Bus `ActiveChanged` signal so it can repair PowerDevil state after the display locks and wakes.
+
+On lock, it records the current brightness. On unlock, it applies a ten-second cooldown, reparses PowerDevil's configuration, restarts `plasma-powerdevil.service`, waits for it to settle, and restores the recorded brightness. This prevents a lock or display wake from leaving brightness controls stale or restoring the wrong brightness level. The last saved value is kept in `$XDG_RUNTIME_DIR/kde-refresh-powerdevil-after-lock.brightness`.
+
 ## Configured Shortcuts
 
 | Shortcut | Action | Logic |

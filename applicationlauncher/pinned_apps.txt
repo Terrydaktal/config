@@ -17,3 +17,4 @@
 /usr/share/applications/virt-manager.desktop
 /usr/share/applications/gimp.desktop
 /usr/share/applications/guvcview.desktop
+/home/lewis/.local/share/applications/tixati.desktop

@@ -1,9 +1,63 @@
 #!/usr/bin/env bash
-KDTOOL="$HOME/.cargo/bin/kdotool"
-stack="${XDG_RUNTIME_DIR:-/tmp}/meta-wheel-min-stack"
-# Get the window ID under the mouse
-wid=$($KDTOOL getmouselocation getwindowid 2>/dev/null | tail -n 1 | tr -d '\r[:space:]')
-if [[ -n "$wid" && "$wid" != "0" ]]; then
-    echo "$wid" >> "$stack"
-    $KDTOOL windowminimize "$wid" >/dev/null 2>&1 &
+set -euo pipefail
+
+KDTOOL_BIN="${KDTOOL_BIN:-$HOME/.cargo/bin/kdotool}"
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+stack="$runtime_dir/meta-wheel-min-stack"
+lock="$stack.lock"
+window_id_pattern='^\{[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}\}$'
+
+is_window_id() {
+	[[ $1 =~ $window_id_pattern ]]
+}
+
+write_stack() {
+	local temporary_stack
+	temporary_stack=$(mktemp "$runtime_dir/.meta-wheel-min-stack.XXXXXX")
+	trap 'rm -f -- "$temporary_stack"' RETURN
+	if ((${#clean_stack[@]})); then
+		printf '%s\n' "${clean_stack[@]}" >"$temporary_stack"
+	else
+		: >"$temporary_stack"
+	fi
+	mv -f -- "$temporary_stack" "$stack"
+	trap - RETURN
+}
+
+location=$("$KDTOOL_BIN" getmouselocation 2>/dev/null) || exit 0
+if [[ $location =~ window:(\{[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}\}) ]]; then
+	wid=${BASH_REMATCH[1]}
+else
+	exit 0
 fi
+
+is_window_id "$wid" || exit 0
+
+exec 9>"$lock"
+flock -x 9
+
+if ! "$KDTOOL_BIN" windowminimize "$wid" >/dev/null 2>&1; then
+	exit 0
+fi
+
+# Keep only the newest occurrence of each valid window, then append this one.
+old_stack=()
+if [[ -r $stack ]]; then
+	mapfile -t old_stack <"$stack"
+fi
+declare -A seen=()
+reverse_stack=()
+for ((index = ${#old_stack[@]} - 1; index >= 0; index--)); do
+	entry=${old_stack[index]}
+	if is_window_id "$entry" && [[ $entry != "$wid" && -z ${seen[$entry]+present} ]]; then
+		seen[$entry]=1
+		reverse_stack+=("$entry")
+	fi
+done
+
+clean_stack=()
+for ((index = ${#reverse_stack[@]} - 1; index >= 0; index--)); do
+	clean_stack+=("${reverse_stack[index]}")
+done
+clean_stack+=("$wid")
+write_stack
