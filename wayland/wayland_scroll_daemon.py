@@ -36,6 +36,13 @@ DEVICE_WAIT_SECONDS = 15
 NORMALIZED_KEYBOARD_NAME = 'xremap normalized keyboard'
 TERMINAL_NAV_KEYBOARD_NAME = 'wayland terminal nav keyboard'
 MOUSE_BY_ID = '/dev/input/by-id/usb-04d9_USB_Gaming_Mouse-event-mouse'
+HI_RES_WHEEL_UNITS = 120
+MODIFIER_KEY_CODES = {
+    'meta': {ecodes.KEY_LEFTMETA, ecodes.KEY_RIGHTMETA},
+    'shift': {ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTSHIFT},
+    'ctrl': {ecodes.KEY_LEFTCTRL, ecodes.KEY_RIGHTCTRL},
+    'alt': {ecodes.KEY_LEFTALT, ecodes.KEY_RIGHTALT},
+}
 TERMINAL_NAV_BUTTONS = {
     ecodes.BTN_SIDE: ecodes.KEY_LEFT,
     ecodes.BTN_BACK: ecodes.KEY_LEFT,
@@ -51,20 +58,125 @@ FORCED_BUTTON_RELEASES = {
 
 def is_modifier_keyboard(dev):
     caps = dev.capabilities()
-    keys = caps.get(ecodes.EV_KEY, [])
-    return any(k in keys for k in [
-        ecodes.KEY_LEFTMETA, ecodes.KEY_RIGHTMETA,
-        ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTSHIFT,
-        ecodes.KEY_LEFTCTRL, ecodes.KEY_RIGHTCTRL,
-    ])
+    keys = set(caps.get(ecodes.EV_KEY, []))
+    return any(keys & codes for codes in MODIFIER_KEY_CODES.values())
 
 def is_wheel_mouse(dev):
     caps = dev.capabilities()
     keys = caps.get(ecodes.EV_KEY, [])
     rel = caps.get(ecodes.EV_REL, [])
-    return ecodes.REL_WHEEL in rel and any(k in keys for k in [
+    has_vertical_wheel = ecodes.REL_WHEEL in rel or ecodes.REL_WHEEL_HI_RES in rel
+    return has_vertical_wheel and any(k in keys for k in [
         ecodes.BTN_LEFT, ecodes.BTN_RIGHT, ecodes.BTN_MIDDLE,
     ])
+
+class ModifierDeviceRegistry:
+    """Keep physical modifier handles synchronized with input hot-plugs."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._known_input_paths = frozenset()
+        self._devices = {}
+
+    @staticmethod
+    def _is_physical_modifier_device(dev):
+        name = dev.name or ''
+        if name in {NORMALIZED_KEYBOARD_NAME, TERMINAL_NAV_KEYBOARD_NAME}:
+            return False
+        if 'ydotool' in name or 'Virtual Mouse' in name:
+            return False
+        return is_modifier_keyboard(dev)
+
+    def refresh(self, force=False):
+        current_paths = frozenset(evdev.list_devices())
+        with self._lock:
+            if not force and current_paths == self._known_input_paths:
+                return
+
+            replacements = {}
+            for path in sorted(current_paths):
+                try:
+                    dev = evdev.InputDevice(path)
+                    if not self._is_physical_modifier_device(dev):
+                        dev.close()
+                        continue
+                    keys = set(dev.capabilities().get(ecodes.EV_KEY, []))
+                    supported = {
+                        modifier for modifier, codes in MODIFIER_KEY_CODES.items()
+                        if keys & codes
+                    }
+                    replacements[path] = (dev, supported)
+                except OSError:
+                    continue
+
+            old_devices = self._devices
+            self._devices = replacements
+            self._known_input_paths = current_paths
+            for dev, _ in old_devices.values():
+                try:
+                    dev.close()
+                except OSError:
+                    pass
+
+    def read(self, retry=True):
+        self.refresh()
+        live = {modifier: False for modifier in MODIFIER_KEY_CODES}
+        available = {modifier: False for modifier in MODIFIER_KEY_CODES}
+        failed = False
+
+        with self._lock:
+            for dev, supported in self._devices.values():
+                try:
+                    active_keys = set(dev.active_keys())
+                except OSError:
+                    failed = True
+                    continue
+                for modifier in supported:
+                    available[modifier] = True
+                    live[modifier] |= bool(active_keys & MODIFIER_KEY_CODES[modifier])
+
+        if failed and retry:
+            self.refresh(force=True)
+            return self.read(retry=False)
+
+        return {
+            modifier: live[modifier] if available[modifier] else state[modifier]
+            for modifier in MODIFIER_KEY_CODES
+        }
+
+class VerticalWheelNormalizer:
+    """Resolve one packet to coarse wheel steps or high-resolution fallback."""
+
+    def __init__(self):
+        self.coarse_delta = 0
+        self.hi_res_delta = 0
+        self.hi_res_remainder = 0
+
+    def add(self, code, value):
+        if code == ecodes.REL_WHEEL:
+            self.coarse_delta += value
+        elif code == ecodes.REL_WHEEL_HI_RES:
+            self.hi_res_delta += value
+
+    def flush(self):
+        if self.coarse_delta:
+            direction = -1 if self.coarse_delta < 0 else 1
+            steps = [direction] * abs(self.coarse_delta)
+            self.hi_res_remainder = 0
+        else:
+            if self.hi_res_delta and self.hi_res_remainder:
+                direction_changed = (self.hi_res_delta < 0) != (self.hi_res_remainder < 0)
+                if direction_changed:
+                    self.hi_res_remainder = 0
+            self.hi_res_remainder += self.hi_res_delta
+            direction = -1 if self.hi_res_remainder < 0 else 1
+            step_count = abs(self.hi_res_remainder) // HI_RES_WHEEL_UNITS
+            steps = [direction] * step_count
+            self.hi_res_remainder -= direction * step_count * HI_RES_WHEEL_UNITS
+
+        self.coarse_delta = 0
+        self.hi_res_delta = 0
+        return steps
 
 def open_stable_mouse():
     try:
@@ -131,7 +243,6 @@ def create_terminal_nav_keyboard():
     }, name=TERMINAL_NAV_KEYBOARD_NAME)
 
 def get_devices(require_normalized_keyboard=False):
-    physical_modifier_devices = []
     normalized_keyboard = None
     stable_mouse = open_stable_mouse()
     mice = [stable_mouse] if stable_mouse else []
@@ -144,47 +255,26 @@ def get_devices(require_normalized_keyboard=False):
             if is_modifier_keyboard(dev):
                 if name == NORMALIZED_KEYBOARD_NAME:
                     normalized_keyboard = dev
-                else:
-                    physical_modifier_devices.append(dev)
             if not stable_mouse and 'Mouse' in name and is_wheel_mouse(dev):
                 mice.append(dev)
         except:
             pass
     if normalized_keyboard:
-        return [normalized_keyboard], physical_modifier_devices, mice
+        return [normalized_keyboard], mice
     if require_normalized_keyboard:
-        return [], physical_modifier_devices, mice
-    return physical_modifier_devices, physical_modifier_devices, mice
+        return [], mice
+    return [], mice
 
 def wait_for_devices():
     deadline = time.monotonic() + DEVICE_WAIT_SECONDS
     while True:
-        keyboards, physical_modifier_devices, mice = get_devices(require_normalized_keyboard=True)
+        keyboards, mice = get_devices(require_normalized_keyboard=True)
         if keyboards and mice:
-            return keyboards, physical_modifier_devices, mice
+            return keyboards, mice
         if time.monotonic() >= deadline:
             print(f"Timed out waiting for {NORMALIZED_KEYBOARD_NAME!r} and {MOUSE_BY_ID}", file=sys.stderr)
             sys.exit(75)
         time.sleep(0.25)
-
-def read_live_modifiers(physical_modifier_devices):
-    """Read physical key state directly, bypassing cross-device event latency."""
-    live = {'meta': False, 'shift': False, 'ctrl': False, 'alt': False}
-    queried_device = False
-    for dev in physical_modifier_devices:
-        try:
-            active_keys = set(dev.active_keys())
-        except OSError:
-            continue
-        queried_device = True
-        live['meta'] |= bool(active_keys & {ecodes.KEY_LEFTMETA, ecodes.KEY_RIGHTMETA})
-        live['shift'] |= bool(active_keys & {ecodes.KEY_LEFTSHIFT, ecodes.KEY_RIGHTSHIFT})
-        live['ctrl'] |= bool(active_keys & {ecodes.KEY_LEFTCTRL, ecodes.KEY_RIGHTCTRL})
-        live['alt'] |= bool(active_keys & {ecodes.KEY_LEFTALT, ecodes.KEY_RIGHTALT})
-
-    if queried_device:
-        return live
-    return {modifier: state[modifier] for modifier in ('meta', 'shift', 'ctrl', 'alt')}
 
 def should_trigger_meta_wheel(direction, now=None):
     """Trigger once at the leading edge of each same-direction wheel burst."""
@@ -197,6 +287,26 @@ def should_trigger_meta_wheel(direction, now=None):
     state['last_meta_wheel_direction'] = direction
     state['last_meta_wheel_event'] = now
     return not same_burst
+
+def dispatch_wheel(direction, is_grabbed, modifier_devices):
+    modifiers = modifier_devices.read()
+    if not (is_grabbed or modifiers['meta'] or modifiers['shift']):
+        return
+
+    if modifiers['meta'] and not modifiers['ctrl']:
+        if not should_trigger_meta_wheel(direction):
+            return
+        command = [MINIMIZE_SCRIPT] if direction < 0 else [RESTORE_SCRIPT]
+    elif modifiers['shift']:
+        shortcut = 'view_zoom_out' if direction < 0 else 'view_zoom_in'
+        command = [
+            'qdbus6', 'org.kde.kglobalaccel', '/component/kwin',
+            'invokeShortcut', shortcut,
+        ]
+    else:
+        return
+
+    subprocess.Popen(command)
 
 def safe_vm_release(mice_with_uis):
     """Release tracked buttons and common pointer buttons on virtual mice."""
@@ -251,7 +361,8 @@ def keyboard_worker(kb, mice_with_uis):
         print(f"Keyboard worker error: {e}", file=sys.stderr)
         os._exit(75)
 
-def mouse_worker(mouse, ui, keyboard_ui, mice_with_uis, physical_modifier_devices):
+def mouse_worker(mouse, ui, keyboard_ui, mice_with_uis, modifier_devices):
+    wheel = VerticalWheelNormalizer()
     try:
         for event in mouse.read_loop():
             is_grabbed = state['mouse_grabbed']
@@ -286,27 +397,19 @@ def mouse_worker(mouse, ui, keyboard_ui, mice_with_uis, physical_modifier_device
                     update_mouse_grab_state(mice_with_uis)
                 continue
 
-            if event.type == ecodes.EV_REL and event.code in [ecodes.REL_WHEEL, 11, 120, 121]:
-                modifiers = read_live_modifiers(physical_modifier_devices)
-                if is_grabbed or modifiers['meta'] or modifiers['shift']:
-                    if event.code == ecodes.REL_WHEEL:
-                        command = None
-                        meta_wheel_action = False
-                        if modifiers['meta'] and not modifiers['ctrl']:
-                            if event.value < 0: command = [MINIMIZE_SCRIPT]
-                            elif event.value > 0: command = [RESTORE_SCRIPT]
-                            meta_wheel_action = command is not None
-                        elif modifiers['shift']:
-                            if event.value < 0: command = ['qdbus6', 'org.kde.kglobalaccel', '/component/kwin', 'invokeShortcut', 'view_zoom_out']
-                            elif event.value > 0: command = ['qdbus6', 'org.kde.kglobalaccel', '/component/kwin', 'invokeShortcut', 'view_zoom_in']
-                        if command and (
-                            not meta_wheel_action
-                            or should_trigger_meta_wheel(-1 if event.value < 0 else 1)
-                        ):
-                            subprocess.Popen(command)
+            if event.type == ecodes.EV_REL and event.code in {
+                ecodes.REL_WHEEL, ecodes.REL_WHEEL_HI_RES,
+            }:
+                wheel.add(event.code, event.value)
+                continue
+            elif event.type == ecodes.EV_SYN and event.code == ecodes.SYN_REPORT:
+                for direction in wheel.flush():
+                    dispatch_wheel(direction, is_grabbed, modifier_devices)
+                if is_grabbed:
+                    ui.syn()
             elif event.type == ecodes.EV_KEY and event.code == ecodes.BTN_MIDDLE:
                 if event.value == 1:
-                    modifiers = read_live_modifiers(physical_modifier_devices)
+                    modifiers = modifier_devices.read()
                     if modifiers['meta'] and modifiers['ctrl']:
                         state['swallow_middle'] = True
                         subprocess.Popen([CLOSE_SCRIPT])
@@ -337,7 +440,9 @@ def mouse_worker(mouse, ui, keyboard_ui, mice_with_uis, physical_modifier_device
 
 def main():
     write_modifier_state()
-    keyboards, physical_modifier_devices, mice = wait_for_devices()
+    keyboards, mice = wait_for_devices()
+    modifier_devices = ModifierDeviceRegistry()
+    modifier_devices.refresh()
     keyboard_ui = None
     mice_with_uis = []
     threads = []
@@ -351,7 +456,7 @@ def main():
             mice_with_uis.append((m, ui))
             t = threading.Thread(
                 target=mouse_worker,
-                args=(m, ui, keyboard_ui, mice_with_uis, physical_modifier_devices),
+                args=(m, ui, keyboard_ui, mice_with_uis, modifier_devices),
                 daemon=True,
             )
             t.start()

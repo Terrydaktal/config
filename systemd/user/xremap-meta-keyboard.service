@@ -1,6 +1,7 @@
 [Unit]
 Description=xremap keyboard normalizer for taskbar launch shortcuts
 After=graphical-session.target plasma-workspace-wayland.target
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple

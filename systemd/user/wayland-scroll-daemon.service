@@ -2,6 +2,7 @@
 Description=Zero-Lag Wayland Scroll Shortcut Daemon
 After=graphical-session.target plasma-workspace-wayland.target xremap-meta-keyboard.service
 Requires=xremap-meta-keyboard.service
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
