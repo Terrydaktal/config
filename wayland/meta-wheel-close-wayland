@@ -11,4 +11,15 @@ else
 fi
 
 [[ $wid =~ $window_id_pattern ]] || exit 0
-exec "$KDTOOL" windowclose "$wid" >/dev/null 2>&1
+
+# KWin can accept the request asynchronously while the client window is still
+# present. Retry only this captured ID and stop as soon as it disappears.
+for ((attempt = 1; attempt <= 4; attempt++)); do
+	"$KDTOOL" windowclose "$wid" >/dev/null 2>&1 || true
+	sleep 0.025
+	if ! "$KDTOOL" getwindowname "$wid" >/dev/null 2>&1; then
+		exit 0
+	fi
+done
+
+exit 0

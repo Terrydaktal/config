@@ -326,20 +326,23 @@ def should_trigger_meta_wheel(direction, now=None):
     return not same_burst
 
 def window_under_cursor_id():
-    try:
-        result = subprocess.run(
-            [KDTOOL, 'getmouselocation', 'getwindowid'],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=0.25,
-        )
-        if result.returncode == 0:
-            window_id = (result.stdout or '').strip().splitlines()
-            if window_id and window_id[-1] not in {'', '0'}:
-                return window_id[-1]
-    except (OSError, subprocess.SubprocessError):
-        pass
+    for attempt in range(2):
+        try:
+            result = subprocess.run(
+                [KDTOOL, 'getmouselocation', 'getwindowid'],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=0.25,
+            )
+            if result.returncode == 0:
+                window_id = (result.stdout or '').strip().splitlines()
+                if window_id and window_id[-1] not in {'', '0'}:
+                    return window_id[-1]
+        except (OSError, subprocess.SubprocessError):
+            pass
+        if attempt == 0:
+            time.sleep(0.01)
     return None
 
 def dispatch_wheel(direction, is_grabbed, modifier_devices):

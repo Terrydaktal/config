@@ -52,7 +52,7 @@ On lock, it records the current brightness. On unlock, it applies a ten-second c
 | :--- | :--- | :--- |
 | **Meta + Scroll Down** | Minimize Window | Targets the window under the cursor and coalesces same-direction events within one 200ms wheel burst. |
 | **Meta + Scroll Up** | Restore Window | Un-minimizes the last window in our stack. |
-| **Ctrl + Meta + Middle Click** | Close Window | Instantly kills the window under the cursor. |
+| **Ctrl + Meta + Middle Click** | Close Window | Captures the window under the cursor, then retries that same ID briefly until KWin removes it. |
 | **Mouse Back/Forward in `xfce4-terminal`** | Directory History | Emits `Alt+Left` / `Alt+Right`, which fish binds to `prevd` / `nextd`. |
 | **Meta + Grave, Ctrl + Grave, or Ctrl + Meta + Grave** | Application Launcher | Opens `~/.local/bin/applicationlauncher` through the environment-scoped xremap launcher wrapper. |
 | **Ctrl + Meta + [1-9]** | Launch New App | Handled directly by `xremap-meta-keyboard.service`, which runs `launch-taskbar-app.sh N` from `~/Dev/config/bin/` to open a fresh instance of the Nth pinned app. |
