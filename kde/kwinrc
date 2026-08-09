@@ -11,6 +11,7 @@ Scale=1.25
 
 [MouseBindings]
 CommandAll1=Move
+CommandAll3=Resize
 CommandAllWheel=Nothing
 Modifier=Meta
 

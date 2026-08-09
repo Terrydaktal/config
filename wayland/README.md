@@ -10,18 +10,18 @@ The system consists of a single **Unified Python Daemon** that acts as the "brai
 This is the core background process. It performs the following roles:
 *   **Keyboard Tracking**: Waits for `xremap normalized keyboard` and watches it for shortcut modifiers (`Ctrl`, `Meta`, `Shift`). At mouse-action time it also reads the physical modifier state directly, avoiding ordering races between xremap's virtual keyboard and the mouse endpoint.
 *   **Hotplug Recovery**: Tracks the current `/dev/input/event*` topology, rediscovers physical modifier devices after keyboard or mouse hotplug, and force-reopens any descriptor that reports an input error. Changed event numbers therefore do not require hard-coded updates.
-*   **Dynamic Mouse Grab**: To preserve 1000Hz gaming mouse performance, it only "grabs" the mouse when a modifier key (`Meta` or `Shift`) is held down and no physical mouse button is already pressed. Clicks that start before the modifier are left on the normal compositor path.
+*   **Dynamic Mouse Grab**: To preserve 1000Hz gaming mouse performance, it only "grabs" the mouse when a modifier key (`Meta` or `Shift`) is held down and no physical mouse button is already pressed. Clicks that start before the modifier are left on the normal compositor path. Grab and ungrab transitions are serialized, roll back partial grabs, and publish the successful state only after the kernel operation completes.
 *   **Stable Mouse Selection**: Opens the real wheel/button endpoint through `/dev/input/by-id/usb-04d9_USB_Gaming_Mouse-event-mouse`, so it does not matter whether the kernel assigns the mouse endpoint to `event3`, `event4`, or another number.
 *   **Wheel Normalization**: Resolves wheel data at each input report boundary, prefers ordinary `REL_WHEEL` steps when both formats are present, and accumulates `REL_WHEEL_HI_RES` units as a fallback for high-resolution-only devices.
-*   **Input Swallowing**: It prevents grabbed mouse events such as modifier scroll and `Ctrl+Meta+Middle Click` from reaching the active application. `Ctrl+Meta+1-9` is handled by the separate `xremap-meta-keyboard` service, which normalizes the split keyboard endpoints and launches the numbered taskbar app directly.
+*   **Input Swallowing**: It prevents grabbed mouse events such as modifier scroll and `Ctrl+Meta+Middle Click` from reaching the active application. Meta wheel actions are suppressed whenever Ctrl is also held. Terminal back/forward clicks are converted to `Alt+Left` / `Alt+Right` only in `xfce4-terminal`; otherwise ungrabbed clicks remain on the compositor path without a duplicate virtual event. `Ctrl+Meta+1-9` is handled by the separate `xremap-meta-keyboard` service, which normalizes the split keyboard endpoints and launches the numbered taskbar app directly.
 *   **Cleanup Logic**: Releases tracked virtual mouse buttons when modifier-driven mouse grabbing is dropped, and force-releases common modifiers/buttons on daemon shutdown so the desktop does not stay stuck in a grabbed state.
 
 ### 2. The Action Scripts
 These scripts are triggered by the daemon and use `kdotool` to interact with KWin's internal window IDs.
 
-*   **`meta-wheel-minimize-wayland`**: Finds and minimizes the window exactly under the cursor, then records its validated ID in a locked, deduplicated stack.
+*   **`meta-wheel-minimize-wayland`**: Minimizes the window ID captured by the daemon at the wheel event boundary, then records its validated ID in a locked, deduplicated stack. It retains a cursor lookup fallback when invoked directly.
 *   **`meta-wheel-restore-wayland`**: Validates the newest stacked ID, un-minimizes that specific window, and removes the entry only after restoration succeeds.
-*   **`meta-wheel-close-wayland`**: Instantly closes the window under the mouse cursor.
+*   **`meta-wheel-close-wayland`**: Instantly closes the window ID captured by the daemon at middle-click time. It retains a cursor lookup fallback when invoked directly.
 *   **`~/Dev/config/bin/launch-taskbar-app.sh`**: Parses your KDE task manager configuration and launches a **fresh instance** of the application at the specified position.
 
 ## KWin Monitor Change Recovery
@@ -54,8 +54,10 @@ On lock, it records the current brightness. On unlock, it applies a ten-second c
 | **Meta + Scroll Up** | Restore Window | Un-minimizes the last window in our stack. |
 | **Ctrl + Meta + Middle Click** | Close Window | Instantly kills the window under the cursor. |
 | **Mouse Back/Forward in `xfce4-terminal`** | Directory History | Emits `Alt+Left` / `Alt+Right`, which fish binds to `prevd` / `nextd`. |
+| **Meta + Grave, Ctrl + Grave, or Ctrl + Meta + Grave** | Application Launcher | Opens `~/.local/bin/applicationlauncher` through the environment-scoped xremap launcher wrapper. |
 | **Ctrl + Meta + [1-9]** | Launch New App | Handled directly by `xremap-meta-keyboard.service`, which runs `launch-taskbar-app.sh N` from `~/Dev/config/bin/` to open a fresh instance of the Nth pinned app. |
 | **Shift + Scroll** | Desktop Zoom | Triggers KWin Desktop Zoom via DBus; zero throttle (smooth). |
+| **Meta + Ctrl + Scroll** | No Action | Deliberately ignored so Ctrl-modified scrolling cannot minimize, restore, or zoom through the Meta wheel path. |
 
 ## Management
 
@@ -67,6 +69,7 @@ The system is managed as a standard **systemd user service**.
 *   **View Logs**: `journalctl --user -u wayland-scroll-daemon.service -f`
 *   **Reload xremap Keyboard Normalizer**: `systemctl --user restart xremap-meta-keyboard.service`
 *   **Boot Ordering**: `wayland-scroll-daemon.service` has `Requires=` and `After=` on `xremap-meta-keyboard.service`, so the scroll daemon waits for the normalized keyboard before selecting devices. Both units disable systemd's start-rate limit and continue retrying when the configured keyboard or mouse is absent during boot.
+*   **Process Ownership**: `xremap-meta-keyboard.service` uses `KillMode=control-group`, while its launch mappings call `bin/xremap-launch-scoped`. The wrapper places each newly launched GUI application in a transient user service, preventing future application windows from becoming xremap service children. Those transient services use `ExitType=cgroup`, so a launcher may exit after backgrounding the GUI without systemd terminating that child. Windows launched by an older service instance remain in that old cgroup until closed or the session is restarted, so apply the unit change at a planned restart rather than during active work.
 
 ## File Locations
 *   **Wayland Scripts**: `~/Dev/config/wayland/`
@@ -74,3 +77,4 @@ The system is managed as a standard **systemd user service**.
 *   **Service File**: `~/Dev/config/systemd/user/wayland-scroll-daemon.service`, installed to `~/.config/systemd/user/wayland-scroll-daemon.service`.
 *   **xremap Keyboard Normalizer Config**: `~/Dev/config/xremap/meta-keyboard.yml`
 *   **xremap Keyboard Normalizer Service**: `~/Dev/config/systemd/user/xremap-meta-keyboard.service`, installed to `~/.config/systemd/user/xremap-meta-keyboard.service`.
+*   **xremap Launcher Wrapper**: `~/Dev/config/bin/xremap-launch-scoped`, which starts GUI launch actions in transient `systemd --user` services.

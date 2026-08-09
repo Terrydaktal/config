@@ -1,0 +1,2 @@
+# Make AMD/Intel RAPL energy counters readable by unprivileged monitoring tools
+SUBSYSTEM=="powercap", ACTION=="add", KERNEL=="intel-rapl:*", RUN+="/usr/bin/chmod 0444 /sys/%p/energy_uj"

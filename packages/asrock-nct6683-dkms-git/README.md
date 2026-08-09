@@ -10,6 +10,12 @@ after CachyOS kernel or header transactions. The hook rebuilds DKMS and checks
 that every installed CachyOS kernel resolves `nct6683` to
 `updates/dkms/nct6683.ko` (including compressed `.ko.zst` modules).
 
+The package also installs `/usr/lib/modules-load.d/asrock-nct6683.conf` so the
+driver loads on every boot and `/usr/lib/modprobe.d/asrock-nct6683.conf` so
+CoolerControl's `nct6687` fallback resolves to the patched `nct6683` module.
+The verifier checks both activation files and confirms the alias resolves
+through the DKMS module for every installed CachyOS kernel.
+
 ## Build and install
 
 ```bash
@@ -26,6 +32,13 @@ fallback, install `linux-cachyos-lts`, `linux-cachyos-lts-headers`, and
 
 ```bash
 pkexec /usr/lib/asrock-nct6683/verify-dkms
+```
+
+To activate fan control immediately after the first installation without
+rebooting:
+
+```bash
+pkexec bash -c 'modprobe nct6683 && systemctl restart coolercontrold'
 ```
 
 Do not reboot into a newly installed kernel until the verifier reports:

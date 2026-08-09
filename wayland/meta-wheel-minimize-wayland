@@ -24,11 +24,15 @@ write_stack() {
 	trap - RETURN
 }
 
-location=$("$KDTOOL_BIN" getmouselocation 2>/dev/null) || exit 0
-if [[ $location =~ window:(\{[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}\}) ]]; then
-	wid=${BASH_REMATCH[1]}
+if (($# == 1)); then
+	wid=$1
 else
-	exit 0
+	location=$("$KDTOOL_BIN" getmouselocation 2>/dev/null) || exit 0
+	if [[ $location =~ window:(\{[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}\}) ]]; then
+		wid=${BASH_REMATCH[1]}
+	else
+		exit 0
+	fi
 fi
 
 is_window_id "$wid" || exit 0

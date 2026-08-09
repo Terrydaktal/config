@@ -206,7 +206,7 @@ Window to Screen 5=none,none,Move Window to Screen 5
 Window to Screen 6=none,none,Move Window to Screen 6
 Window to Screen 7=none,none,Move Window to Screen 7
 _k_friendly_name=KWin
-applicationlauncher-reopen-latest=Ctrl+Shift+T,none,Reopen recently closed window
+applicationlauncher-reopen-latest=Meta+Ctrl+Shift+T,none,Reopen recently closed window
 disableInputCapture=Meta+Shift+Esc,Meta+Shift+Esc,Disable Active Input Capture
 view_actual_size=Meta+0,Meta+0,Zoom to Actual Size
 view_zoom_in=Meta++\tMeta+=,Meta++\tMeta+=,Zoom In

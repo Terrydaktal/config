@@ -1,5 +1,5 @@
 pkgname=asrock-nct6683-dkms-git
-pkgver=r11.b31e58a81efc
+pkgver=r12.c84d1276cb0e
 pkgrel=1
 pkgdesc='DKMS driver for PWM control on supported ASRock NCT6683/NCT6686 boards'
 arch=('any')
@@ -9,37 +9,43 @@ depends=('dkms' 'linux-cachyos-headers')
 optdepends=('linux-cachyos-lts-headers: build the driver for the optional CachyOS LTS fallback kernel')
 makedepends=('git')
 source=('git+https://github.com/branchmispredictor/asrock-nct6683.git#branch=main'
-        'verify-dkms'
-        '75-asrock-nct6683-dkms.hook')
-b2sums=('SKIP' 'SKIP' 'SKIP')
+	'verify-dkms'
+	'75-asrock-nct6683-dkms.hook'
+	'asrock-nct6683.modules-load'
+	'asrock-nct6683.modprobe')
+b2sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 _srcname='asrock-nct6683'
 _dkmsname='asrock-nct6683'
 
 pkgver() {
-  cd "$_srcname"
-  printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short=12 HEAD)"
+	cd "$_srcname"
+	printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short=12 HEAD)"
 }
 
 package() {
-  local _srcdir="$srcdir/$_srcname"
-  local _destdir="$pkgdir/usr/src/$_dkmsname-$pkgver"
+	local _srcdir="$srcdir/$_srcname"
+	local _destdir="$pkgdir/usr/src/$_dkmsname-$pkgver"
 
-  install -dm755 "$_destdir"
-  install -Dm644 "$_srcdir/Kbuild" "$_destdir/Kbuild"
-  install -Dm644 "$_srcdir/Makefile" "$_destdir/Makefile"
-  install -Dm644 "$_srcdir/LICENSE" "$_destdir/LICENSE"
-  install -Dm644 "$_srcdir/README.md" "$_destdir/README.md"
-  install -Dm644 "$_srcdir/nct6683.c" "$_destdir/nct6683.c"
+	install -dm755 "$_destdir"
+	install -Dm644 "$_srcdir/Kbuild" "$_destdir/Kbuild"
+	install -Dm644 "$_srcdir/Makefile" "$_destdir/Makefile"
+	install -Dm644 "$_srcdir/LICENSE" "$_destdir/LICENSE"
+	install -Dm644 "$_srcdir/README.md" "$_destdir/README.md"
+	install -Dm644 "$_srcdir/nct6683.c" "$_destdir/nct6683.c"
 
-  sed \
-    -e "s/@PACKAGE_VERSION@/$pkgver/" \
-    -e "s/@PACKAGE_NAME@/$_dkmsname/" \
-    -e 's/@BUILT_MODULE_NAME@/nct6683/' \
-    "$_srcdir/dkms.conf.am" > "$_destdir/dkms.conf"
+	sed \
+		-e "s/@PACKAGE_VERSION@/$pkgver/" \
+		-e "s/@PACKAGE_NAME@/$_dkmsname/" \
+		-e 's/@BUILT_MODULE_NAME@/nct6683/' \
+		"$_srcdir/dkms.conf.am" >"$_destdir/dkms.conf"
 
-  install -Dm755 "$srcdir/verify-dkms" \
-    "$pkgdir/usr/lib/asrock-nct6683/verify-dkms"
-  install -Dm644 "$srcdir/75-asrock-nct6683-dkms.hook" \
-    "$pkgdir/usr/share/libalpm/hooks/75-asrock-nct6683-dkms.hook"
+	install -Dm755 "$srcdir/verify-dkms" \
+		"$pkgdir/usr/lib/asrock-nct6683/verify-dkms"
+	install -Dm644 "$srcdir/75-asrock-nct6683-dkms.hook" \
+		"$pkgdir/usr/share/libalpm/hooks/75-asrock-nct6683-dkms.hook"
+	install -Dm644 "$srcdir/asrock-nct6683.modules-load" \
+		"$pkgdir/usr/lib/modules-load.d/asrock-nct6683.conf"
+	install -Dm644 "$srcdir/asrock-nct6683.modprobe" \
+		"$pkgdir/usr/lib/modprobe.d/asrock-nct6683.conf"
 }

@@ -4,51 +4,53 @@
 # Ctrl and number keys come from the Corsair keyboard endpoints. This service
 # grabs only those explicit keyboard-capable devices, re-emits normal keyboard
 # input through one virtual keyboard, handles Ctrl+Meta+1-9 without letting
-# the number key leak into the focused application, and exposes extra Meta-only
-# launch shortcuts from the same normalized device.
+# the number key leak into the focused application, and exposes launcher
+# shortcuts from the same normalized device.
 keymap:
   - name: Launch fresh taskbar app instances
-    exact_match: false
+    exact_match: true
     remap:
       KEY_KPENTER: null
       C-w: null
       Super-grave:
-        launch: ["/home/lewis/.local/bin/applicationlauncher"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]
       C-grave:
-        launch: ["/home/lewis/.local/bin/applicationlauncher"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]
+      C-Super-grave:
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]
       C-1:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
       C-2:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "2"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "2"]
       C-3:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "3"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "3"]
       C-4:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "4"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "4"]
       C-5:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "5"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "5"]
       C-6:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "6"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "6"]
       C-7:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "7"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "7"]
       C-8:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "8"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "8"]
       C-9:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "9"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "9"]
       C-Super-1:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
       C-Super-2:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "2"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "2"]
       C-Super-3:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "3"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "3"]
       C-Super-4:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "4"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "4"]
       C-Super-5:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "5"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "5"]
       C-Super-6:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "6"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "6"]
       C-Super-7:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "7"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "7"]
       C-Super-8:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "8"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "8"]
       C-Super-9:
-        launch: ["/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "9"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "9"]

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Quoted ~/ paths are intentional inputs to migrate_and_link(), which expands
+# them only after accepting the complete path as one argument.
+# shellcheck disable=SC2088
+
 # Bootstrap script to set up symlinks and enable/start systemd services
 
 REPO_DIR="$HOME/Dev/config"
@@ -55,6 +59,110 @@ migrate_and_link() {
 	else
 		echo "✗ Neither $src nor $dest exists"
 	fi
+}
+
+configure_system() {
+	local bootstrap_user
+	local required_source
+	local -a required_sources=(
+		"$REPO_DIR/etc/iw-regdomain"
+		"$REPO_DIR/etc/modprobe.d/cfg80211-regdom.conf"
+		"$REPO_DIR/etc/mkinitcpio.conf.d/20-wireless-regdb.conf"
+		"$REPO_DIR/packages/asrock-nct6683-dkms-git/PKGBUILD"
+		"$REPO_DIR/packages/asrock-nct6683-dkms-git/verify-dkms"
+		"$REPO_DIR/packages/asrock-nct6683-dkms-git/75-asrock-nct6683-dkms.hook"
+		"$REPO_DIR/packages/asrock-nct6683-dkms-git/asrock-nct6683.modules-load"
+		"$REPO_DIR/packages/asrock-nct6683-dkms-git/asrock-nct6683.modprobe"
+	)
+
+	command -v pkexec >/dev/null 2>&1 || {
+		echo "✗ pkexec is required for system configuration" >&2
+		return 1
+	}
+
+	for required_source in "${required_sources[@]}"; do
+		if [ ! -r "$required_source" ]; then
+			echo "✗ Required repository source is missing: $required_source" >&2
+			return 1
+		fi
+	done
+
+	bootstrap_user="$(id -un)"
+	pkexec bash -c '
+set -euo pipefail
+
+repo_dir=$1
+bootstrap_user=$2
+package_dir="$repo_dir/packages/asrock-nct6683-dkms-git"
+
+install -Dm644 "$repo_dir/etc/iw-regdomain" /etc/iw-regdomain
+install -Dm644 "$repo_dir/etc/modprobe.d/cfg80211-regdom.conf" \
+    /etc/modprobe.d/cfg80211-regdom.conf
+install -Dm644 "$repo_dir/etc/mkinitcpio.conf.d/20-wireless-regdb.conf" \
+    /etc/mkinitcpio.conf.d/20-wireless-regdb.conf
+rm -f /etc/modprobe.d/nct6687-alias.conf
+pacman -S --needed --noconfirm wireless-regdb
+
+nct_package=asrock-nct6683-dkms-git
+nct_install_required=0
+if ! pacman -Qq "$nct_package" >/dev/null 2>&1; then
+    nct_install_required=1
+else
+    for package_file in \
+        /usr/lib/modules-load.d/asrock-nct6683.conf \
+        /usr/lib/modprobe.d/asrock-nct6683.conf \
+        /usr/lib/asrock-nct6683/verify-dkms; do
+        if [[ $(pacman -Qqo "$package_file" 2>/dev/null || true) != "$nct_package" ]]; then
+            nct_install_required=1
+        fi
+    done
+fi
+
+if ((nct_install_required)); then
+    build_dependencies=(base-devel git dkms linux-cachyos-headers wireless-regdb)
+    if pacman -Qq linux-cachyos-lts >/dev/null 2>&1; then
+        build_dependencies+=(linux-cachyos-lts-headers)
+    fi
+    pacman -S --needed --noconfirm "${build_dependencies[@]}"
+
+    bootstrap_home=$(getent passwd "$bootstrap_user" | cut -d: -f6)
+    [[ -n $bootstrap_home ]] || {
+        echo "Could not determine home directory for $bootstrap_user" >&2
+        exit 1
+    }
+    runuser -u "$bootstrap_user" -- env HOME="$bootstrap_home" \
+        bash -c '\''
+set -euo pipefail
+cd "$1"
+makepkg --cleanbuild --clean --force --noconfirm
+'\'' bash "$package_dir"
+    package_path=$(runuser -u "$bootstrap_user" -- env HOME="$bootstrap_home" \
+        bash -c '\''cd "$1" && makepkg --packagelist | tail -n 1'\'' bash "$package_dir")
+    [[ -r $package_path ]] || {
+        echo "Built NCT6683 package was not found: $package_path" >&2
+        exit 1
+    }
+    pacman -U --noconfirm "$package_path"
+fi
+
+/usr/lib/asrock-nct6683/verify-dkms
+mkinitcpio -P
+
+enable_system_unit() {
+    local unit=$1 mode=$2
+    systemctl cat "$unit" >/dev/null 2>&1 || return 0
+    if [[ $mode == now ]]; then
+        systemctl enable --now "$unit"
+    else
+        systemctl enable "$unit"
+    fi
+}
+
+enable_system_unit systemd-timesyncd.service now
+enable_system_unit nvidia-power-limit.service enable
+enable_system_unit ufw.service now
+enable_system_unit sshd.service now
+' bash "$REPO_DIR" "$bootstrap_user"
 }
 
 echo "=== 1. Disabling and removing redundant xremap configs/services ==="
@@ -174,14 +282,30 @@ else
 	echo "⚠ /etc/NetworkManager/conf.d/20-connectivity.conf not found"
 fi
 
-# Track custom modprobe configs (like sensor aliases)
-mkdir -p "$REPO_DIR/etc/modprobe.d"
-if [ -f "/etc/modprobe.d/nct6687-alias.conf" ]; then
-	cp "/etc/modprobe.d/nct6687-alias.conf" "$REPO_DIR/etc/modprobe.d/nct6687-alias.conf"
-	echo "✔ Copied /etc/modprobe.d/nct6687-alias.conf to repo"
-else
-	echo "⚠ /etc/modprobe.d/nct6687-alias.conf not found"
-fi
+# Track early wireless regulatory configuration. On a fresh installation the
+# repository copies are preserved here and restored by configure_system().
+system_config_files=(
+	"/etc/iw-regdomain:etc/iw-regdomain"
+	"/etc/modprobe.d/cfg80211-regdom.conf:etc/modprobe.d/cfg80211-regdom.conf"
+	"/etc/mkinitcpio.conf.d/20-wireless-regdb.conf:etc/mkinitcpio.conf.d/20-wireless-regdb.conf"
+)
+for system_config in "${system_config_files[@]}"; do
+	IFS=: read -r system_path repo_path <<<"$system_config"
+	if [ -f "$REPO_DIR/$repo_path" ]; then
+		if [ -f "$system_path" ] && cmp -s "$system_path" "$REPO_DIR/$repo_path"; then
+			echo "✔ $system_path matches the repository"
+		else
+			echo "ℹ $system_path will be restored from the repository"
+		fi
+	elif [ -f "$system_path" ]; then
+		mkdir -p "$(dirname "$REPO_DIR/$repo_path")"
+		cp "$system_path" "$REPO_DIR/$repo_path"
+		echo "✔ Copied $system_path to repo"
+	else
+		echo "✗ Neither $system_path nor $REPO_DIR/$repo_path exists" >&2
+		exit 1
+	fi
+done
 
 # Track custom udev rules
 mkdir -p "$REPO_DIR/etc/udev/rules.d"
@@ -189,6 +313,7 @@ udev_rules=(
 	"99-hdd-scheduler.rules"
 	"99-xremap.rules"
 	"99-kwin-reinit-on-hotplug.rules"
+	"99-rapl.rules"
 )
 for rule in "${udev_rules[@]}"; do
 	if [ -f "/etc/udev/rules.d/$rule" ]; then
@@ -261,40 +386,8 @@ for svc in wayland-scroll-daemon.service xremap-meta-keyboard.service kde-refres
 done
 
 echo -e "\n=== 6. Enabling systemd system services ==="
-if systemctl is-enabled systemd-timesyncd.service &>/dev/null; then
-	echo "✔ System service is already enabled: systemd-timesyncd"
-elif systemctl list-unit-files systemd-timesyncd.service &>/dev/null; then
-	echo "Enabling system service: systemd-timesyncd"
-	sudo systemctl enable --now systemd-timesyncd.service
-else
-	echo "⚠ systemd-timesyncd.service not found, skipping"
-fi
-
-if systemctl is-enabled nvidia-power-limit.service &>/dev/null; then
-	echo "✔ System service is already enabled: nvidia-power-limit"
-elif [ -f "/etc/systemd/system/nvidia-power-limit.service" ]; then
-	echo "Enabling system service: nvidia-power-limit"
-	sudo systemctl enable nvidia-power-limit.service
-else
-	echo "⚠ nvidia-power-limit.service not found, skipping"
-fi
-
-if systemctl is-enabled ufw.service &>/dev/null; then
-	echo "✔ System service is already enabled: ufw"
-elif systemctl list-unit-files ufw.service &>/dev/null; then
-	echo "Enabling system service: ufw"
-	sudo systemctl enable --now ufw.service
-else
-	echo "⚠ ufw.service not found, skipping"
-fi
-
-if systemctl is-enabled sshd.service &>/dev/null; then
-	echo "✔ System service is already enabled: sshd"
-elif systemctl list-unit-files sshd.service &>/dev/null; then
-	echo "Enabling system service: sshd"
-	sudo systemctl enable --now sshd.service
-else
-	echo "⚠ sshd.service not found, skipping"
-fi
+echo "Administrator authentication will restore system configuration, verify fan-control DKMS, rebuild initramfs images, and enable available system services."
+configure_system
+echo "✔ System configuration restored and verified"
 
 echo -e "\n★ Bootstrap complete! Please verify with 'git status' in ~/Dev/config."

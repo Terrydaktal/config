@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if (($# == 0)); then
+	exit 64
+fi
+
+# Keep GUI children out of xremap's service cgroup so reloading the normalizer
+# cannot accidentally own or terminate existing application windows. A
+# transient service is detached with --no-block and gets its own cgroup.
+# ExitType=cgroup keeps background GUI children alive after a launcher exits.
+if systemd-run --user --quiet --collect --no-block \
+	--property=ExitType=cgroup -- "$@" \
+	>/dev/null 2>&1; then
+	exit 0
+fi
+
+# Preserve the shortcut if the user manager is unavailable during session
+# startup. This path is a fallback, not the normal launch path.
+exec "$@"

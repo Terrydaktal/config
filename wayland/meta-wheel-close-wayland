@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
-KDTOOL="$HOME/.cargo/bin/kdotool"
-# Get the window ID under the mouse
-wid=$($KDTOOL getmouselocation getwindowid 2>/dev/null | tail -n 1 | tr -d '\r[:space:]')
-if [[ -n "$wid" && "$wid" != "0" ]]; then
-    $KDTOOL windowclose "$wid" >/dev/null 2>&1 &
+set -euo pipefail
+
+KDTOOL="${KDTOOL_BIN:-$HOME/.cargo/bin/kdotool}"
+window_id_pattern='^\{[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}\}$'
+
+if (($# == 1)); then
+	wid=$1
+else
+	wid=$("$KDTOOL" getmouselocation getwindowid 2>/dev/null | tail -n 1 | tr -d '\r[:space:]')
 fi
+
+[[ $wid =~ $window_id_pattern ]] || exit 0
+exec "$KDTOOL" windowclose "$wid" >/dev/null 2>&1
