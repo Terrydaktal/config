@@ -235,9 +235,13 @@ migrate_and_link "~/.config/environment.d/90-nvidia-vaapi.conf" "$REPO_DIR/envir
 # Mousepad desktop override launcher
 migrate_and_link "~/.local/share/applications/org.xfce.mousepad.desktop" "$REPO_DIR/applications/org.xfce.mousepad.desktop"
 
+# Chrome launcher wrapper
+migrate_and_link "~/.local/bin/google-chrome-fast" "$REPO_DIR/bin/google-chrome-fast"
+
 # Systemd user units (already in repo)
 migrate_and_link "~/.config/systemd/user/wayland-scroll-daemon.service" "$REPO_DIR/systemd/user/wayland-scroll-daemon.service"
 migrate_and_link "~/.config/systemd/user/xremap-meta-keyboard.service" "$REPO_DIR/systemd/user/xremap-meta-keyboard.service"
+migrate_and_link "~/.config/systemd/user/krfb-tunnel.service" "$REPO_DIR/systemd/user/krfb-tunnel.service"
 
 # New systemd user unit & helper script
 migrate_and_link "~/.config/systemd/user/kde-refresh-powerdevil-after-lock.service" "$REPO_DIR/systemd/user/kde-refresh-powerdevil-after-lock.service"
@@ -360,21 +364,20 @@ done
 
 # Track custom SSH daemon configuration
 mkdir -p "$REPO_DIR/etc/ssh/sshd_config.d"
-for conf in port34567.conf 99-security.conf; do
-	if [ -f "/etc/ssh/sshd_config.d/$conf" ]; then
-		cp "/etc/ssh/sshd_config.d/$conf" "$REPO_DIR/etc/ssh/sshd_config.d/$conf"
-		echo "✔ Copied /etc/ssh/sshd_config.d/$conf to repo"
-	else
-		echo "⚠ /etc/ssh/sshd_config.d/$conf not found"
-	fi
-done
+conf=99-security.conf
+if [ -f "/etc/ssh/sshd_config.d/$conf" ]; then
+	cp "/etc/ssh/sshd_config.d/$conf" "$REPO_DIR/etc/ssh/sshd_config.d/$conf"
+	echo "✔ Copied /etc/ssh/sshd_config.d/$conf to repo"
+else
+	echo "⚠ /etc/ssh/sshd_config.d/$conf not found"
+fi
 
 echo -e "\n=== 4. Reloading systemd user manager ==="
 systemctl --user daemon-reload
 echo "✔ Reloaded systemd user daemon"
 
 echo -e "\n=== 5. Enabling systemd user services ==="
-for svc in wayland-scroll-daemon.service xremap-meta-keyboard.service kde-refresh-powerdevil-after-lock.service ydotool.service; do
+for svc in wayland-scroll-daemon.service xremap-meta-keyboard.service kde-refresh-powerdevil-after-lock.service krfb-tunnel.service ydotool.service; do
 	if systemctl --user is-enabled "$svc" &>/dev/null; then
 		echo "✔ User service is already enabled: $svc"
 	elif systemctl --user list-unit-files "$svc" &>/dev/null; then

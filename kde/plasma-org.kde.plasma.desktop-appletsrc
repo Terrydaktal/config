@@ -185,7 +185,7 @@ DialogWidth=810
 
 [Containments][26][Applets][27][Configuration][General]
 fill=false
-launchers=applications:xfce4-terminal.desktop,preferred://filemanager,applications:org.xfce.mousepad.desktop,applications:firefox.desktop,preferred://browser,applications:org.telegram.desktop.desktop,applications:org.coolercontrol.CoolerControl.desktop
+launchers=applications:xfce4-terminal.desktop,preferred://filemanager,applications:org.xfce.mousepad.desktop,applications:firefox.desktop,applications:google-chrome.desktop,applications:org.telegram.desktop.desktop,applications:org.coolercontrol.CoolerControl.desktop
 
 [Containments][26][General]
 AppletOrder=27

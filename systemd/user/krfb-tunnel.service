@@ -1,0 +1,16 @@
+[Unit]
+Description=KRFB VNC server (SSH tunnel only)
+PartOf=plasma-workspace.target
+After=plasma-core.target plasma-xdg-desktop-portal-kde.service
+
+[Service]
+Type=exec
+Environment=QT_PLUGIN_PATH=%h/repos/krfb/install/lib/plugins:/usr/lib/qt6/plugins
+ExecStart=%h/repos/krfb/install/bin/krfb --nodialog --desktopfile org.kde.krfb
+Restart=on-failure
+RestartSec=2
+IPAddressDeny=any
+IPAddressAllow=localhost
+
+[Install]
+WantedBy=plasma-workspace.target

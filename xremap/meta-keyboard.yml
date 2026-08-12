@@ -4,10 +4,10 @@
 # Ctrl and number keys come from the Corsair keyboard endpoints. This service
 # grabs only those explicit keyboard-capable devices, re-emits normal keyboard
 # input through one virtual keyboard, handles Ctrl+Meta+1-9 without letting
-# the number key leak into the focused application, and exposes launcher
-# shortcuts from the same normalized device.
+# the number key leak into the focused application, gives Meta+5 a direct
+# Chrome launch fallback, and exposes launcher shortcuts from the same device.
 keymap:
-  - name: Launch fresh taskbar app instances
+  - name: Handle normalized launcher shortcuts
     exact_match: true
     remap:
       KEY_KPENTER: null
@@ -18,6 +18,8 @@ keymap:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]
       C-Super-grave:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]
+      Super-5:
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/activate-or-launch-chrome.sh"]
       C-1:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "1"]
       C-2:
@@ -43,7 +45,7 @@ keymap:
       C-Super-3:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "3"]
       C-Super-4:
-        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "4"]
+        launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/firefox-new-window-fast"]
       C-Super-5:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/launch-taskbar-app.sh", "5"]
       C-Super-6:

@@ -23,6 +23,7 @@ These scripts are triggered by the daemon and use `kdotool` to interact with KWi
 *   **`meta-wheel-restore-wayland`**: Validates the newest stacked ID, un-minimizes that specific window, and removes the entry only after restoration succeeds.
 *   **`meta-wheel-close-wayland`**: Instantly closes the window ID captured by the daemon at middle-click time. It retains a cursor lookup fallback when invoked directly.
 *   **`~/Dev/config/bin/launch-taskbar-app.sh`**: Parses your KDE task manager configuration and launches a **fresh instance** of the application at the specified position.
+*   **`~/Dev/config/bin/firefox-new-window-fast`**: Opens Google in a Firefox window through the running profile's D-Bus remote endpoint, avoiding secondary Firefox startup and profile-lock validation. It starts Firefox normally when no remote endpoint exists.
 
 ## KWin Monitor Change Recovery
 
@@ -55,7 +56,7 @@ On lock, it records the current brightness. On unlock, it applies a ten-second c
 | **Ctrl + Meta + Middle Click** | Close Window | Captures the window under the cursor, then retries that same ID briefly until KWin removes it. |
 | **Mouse Back/Forward in `xfce4-terminal`** | Directory History | Emits `Alt+Left` / `Alt+Right`, which fish binds to `prevd` / `nextd`. |
 | **Meta + Grave, Ctrl + Grave, or Ctrl + Meta + Grave** | Application Launcher | Opens `~/.local/bin/applicationlauncher` through the environment-scoped xremap launcher wrapper. |
-| **Ctrl + Meta + [1-9]** | Launch New App | Handled directly by `xremap-meta-keyboard.service`, which runs `launch-taskbar-app.sh N` from `~/Dev/config/bin/` to open a fresh instance of the Nth pinned app. |
+| **Ctrl + Meta + [1-9]** | Launch New App | Handled directly by `xremap-meta-keyboard.service`. Slot 4 uses `firefox-new-window-fast` to open Google in a new Firefox window; the other slots run `launch-taskbar-app.sh N` to open a fresh instance of the Nth pinned app. |
 | **Shift + Scroll** | Desktop Zoom | Triggers KWin Desktop Zoom via DBus; zero throttle (smooth). |
 | **Meta + Ctrl + Scroll** | No Action | Deliberately ignored so Ctrl-modified scrolling cannot minimize, restore, or zoom through the Meta wheel path. |
 
@@ -73,7 +74,7 @@ The system is managed as a standard **systemd user service**.
 
 ## File Locations
 *   **Wayland Scripts**: `~/Dev/config/wayland/`
-*   **Shared Launcher Script**: `~/Dev/config/bin/launch-taskbar-app.sh`
+*   **Shared Launcher Scripts**: `~/Dev/config/bin/launch-taskbar-app.sh` and `~/Dev/config/bin/firefox-new-window-fast`
 *   **Service File**: `~/Dev/config/systemd/user/wayland-scroll-daemon.service`, installed to `~/.config/systemd/user/wayland-scroll-daemon.service`.
 *   **xremap Keyboard Normalizer Config**: `~/Dev/config/xremap/meta-keyboard.yml`
 *   **xremap Keyboard Normalizer Service**: `~/Dev/config/systemd/user/xremap-meta-keyboard.service`, installed to `~/.config/systemd/user/xremap-meta-keyboard.service`.

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+firefox=/usr/lib/firefox/firefox
+target=https://www.google.com/
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+exec 9>"$runtime_dir/firefox-new-window-fast.lock"
+flock -n 9 || exit 0
+
+append_uint32_le() {
+	local value=$1
+
+	payload+=(
+		"$((value & 0xff))"
+		"$(((value >> 8) & 0xff))"
+		"$(((value >> 16) & 0xff))"
+		"$(((value >> 24) & 0xff))"
+	)
+}
+
+byte_count() {
+	LC_ALL=C printf '%s' "$1" | wc -c
+}
+
+append_string() {
+	local value=$1
+	local byte
+
+	while IFS= read -r byte; do
+		[[ -n "$byte" ]] && payload+=("$byte")
+	done < <(LC_ALL=C printf '%s' "$value" | od -An -v -tu1 | awk '{ for (i = 1; i <= NF; i++) print $i }')
+	payload+=(0)
+}
+
+destination="$({
+	busctl --user --no-pager --no-legend list 2>/dev/null || true
+} | awk '$1 ~ /^org\.mozilla\.firefox\./ { print $1; exit }')"
+
+if [[ -n "$destination" ]]; then
+	arguments=("$firefox" --new-window "$target")
+	payload=()
+	header_size=$((4 * (${#arguments[@]} + 1)))
+	offset=$((header_size + $(byte_count "$PWD") + 1))
+
+	append_uint32_le "${#arguments[@]}"
+	for argument in "${arguments[@]}"; do
+		append_uint32_le "$offset"
+		offset=$((offset + $(byte_count "$argument") + 1))
+	done
+
+	append_string "$PWD"
+	for argument in "${arguments[@]}"; do
+		append_string "$argument"
+	done
+
+	printf -v payload_variant '%s,' "${payload[@]}"
+	payload_variant="[${payload_variant%,}]"
+
+	if gdbus call --session \
+		--dest "$destination" \
+		--object-path /org/mozilla/firefox/Remote \
+		--method org.mozilla.firefox.OpenURL \
+		"$payload_variant" >/dev/null 2>&1; then
+		exit 0
+	fi
+fi
+
+flock -u 9
+exec "$firefox" --new-window "$target"

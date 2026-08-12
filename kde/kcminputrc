@@ -1,2 +1,5 @@
 [Libinput][1241][64609][USB Gaming Mouse]
 PointerAcceleration=-0.200
+
+[Libinput][9011][26214][ydotoold virtual device]
+PointerAccelerationProfile=2

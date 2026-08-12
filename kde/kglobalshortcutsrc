@@ -284,6 +284,11 @@ _launch=Num++
 [services][org.kde.kscreen.desktop]
 ShowOSD=Display
 
+[services][org.kde.spectacle.desktop]
+RecordRegion=none
+RecordScreen=none
+RecordWindow=none
+
 [token_copyq]
 LOGO+CTRL+SHIFT+DOWN||Show/hide main window=none,Meta+Ctrl+Shift+Down,CopyQ - Show/hide main window
 _k_friendly_name=xdg-desktop-portal-kde

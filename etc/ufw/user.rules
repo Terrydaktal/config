@@ -17,14 +17,14 @@
 :ufw-user-limit-accept - [0:0]
 ### RULES ###
 
-### tuple ### allow tcp 34567 0.0.0.0/0 any 0.0.0.0/0 in
--A ufw-user-input -p tcp --dport 34567 -j ACCEPT
-
 ### tuple ### allow tcp 22 0.0.0.0/0 any 0.0.0.0/0 in
 -A ufw-user-input -p tcp --dport 22 -j ACCEPT
 
 ### tuple ### allow tcp 9090 0.0.0.0/0 any 0.0.0.0/0 in
 -A ufw-user-input -p tcp --dport 9090 -j ACCEPT
+
+### tuple ### deny tcp 5900 0.0.0.0/0 any 0.0.0.0/0 in
+-A ufw-user-input -p tcp --dport 5900 -j DROP
 
 ### END RULES ###
 
