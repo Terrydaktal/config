@@ -62,6 +62,7 @@ MoveZoomRight=none,none,Move Zoomed Area to Right
 MoveZoomUp=none,none,Move Zoomed Area Upwards
 Overview=none,Meta+W,Toggle Overview
 Restore Under Cursor=none,none,Maximize/Restore window under cursor
+ScreenshotWaylandCapture=none,none,Capture with screenshot
 Setup Window Shortcut=none,none,Setup Window Shortcut
 Show Desktop=none,Meta+D,Peek at Desktop
 Switch One Desktop Down=none,Meta+Ctrl+Down,Switch One Desktop Down
@@ -206,7 +207,8 @@ Window to Screen 5=none,none,Move Window to Screen 5
 Window to Screen 6=none,none,Move Window to Screen 6
 Window to Screen 7=none,none,Move Window to Screen 7
 _k_friendly_name=KWin
-applicationlauncher-reopen-latest=Meta+Ctrl+Shift+T,none,Reopen recently closed window
+applicationlauncher-reopen-latest=Ctrl+Shift+T,none,Reopen recently closed window
+copyq-window-toggle=F24,none,Toggle existing CopyQ window
 disableInputCapture=Meta+Shift+Esc,Meta+Shift+Esc,Disable Active Input Capture
 view_actual_size=Meta+0,Meta+0,Zoom to Actual Size
 view_zoom_in=Meta++\tMeta+=,Meta++\tMeta+=,Zoom In
@@ -274,9 +276,6 @@ show-on-mouse-pos=none,Meta+V,Show Clipboard Items at Mouse Position
 switch to next activity=none,none,Switch to Next Activity
 switch to previous activity=none,none,Switch to Previous Activity
 toggle do not disturb=none,none,Toggle do not disturb
-
-[services][net.local.copyq.desktop]
-_launch=Meta+Ctrl+Shift+Up
 
 [services][net.local.trigger.sh.desktop]
 _launch=Num++

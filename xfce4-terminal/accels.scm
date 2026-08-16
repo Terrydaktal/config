@@ -2,7 +2,7 @@
 ; this file is an automated accelerator map dump
 ;
 ; (gtk_accel_path "<Actions>/terminal-window/copy-html" "")
-; (gtk_accel_path "<Actions>/terminal-window/new-tab" "<Primary><Shift>t")
+(gtk_accel_path "<Actions>/terminal-window/new-tab" "")
 ; (gtk_accel_path "<Actions>/terminal-window/reset" "")
 ; (gtk_accel_path "<Actions>/terminal-window/next-tab" "<Primary>Page_Down")
 ; (gtk_accel_path "<Actions>/terminal-window/search-prev" "")

@@ -1,0 +1,11 @@
+[Unit]
+Description=Show the existing CopyQ main window
+After=graphical-session.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/home/lewis/.local/bin/copyq show
+TimeoutStartSec=5
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly QDBUS=/usr/bin/qdbus6
+readonly PLUGIN_ID=copyq-window-toggle
+readonly SCRIPT_PATH=/home/lewis/Dev/config/kde/kwin/scripts/copyq-window-toggle/contents/code/main.js
+
+script_state() {
+	"$QDBUS" org.kde.KWin /Scripting org.kde.kwin.Scripting.isScriptLoaded "$PLUGIN_ID" 2>/dev/null
+}
+
+state=
+for ((attempt = 1; attempt <= 120; ++attempt)); do
+	if state="$(script_state)"; then
+		break
+	fi
+	sleep 0.25
+done
+
+if [[ -z $state ]]; then
+	echo "KWin scripting did not become available within 30 seconds" >&2
+	exit 1
+fi
+
+if [[ $state == true ]]; then
+	exit 0
+fi
+
+if [[ ! -r $SCRIPT_PATH ]]; then
+	echo "CopyQ KWin script is not readable: $SCRIPT_PATH" >&2
+	exit 1
+fi
+
+load_result="$($QDBUS org.kde.KWin /Scripting org.kde.kwin.Scripting.loadScript "$SCRIPT_PATH" "$PLUGIN_ID")"
+"$QDBUS" org.kde.KWin /Scripting org.kde.kwin.Scripting.start
+
+# Script evaluation is asynchronous; verify it remains loaded after evaluation.
+sleep 1
+if [[ $(script_state) != true ]]; then
+	echo "CopyQ KWin script failed to stay loaded (load result: $load_result)" >&2
+	exit 1
+fi
+
+echo "Loaded CopyQ KWin window toggle (script id: $load_result)"

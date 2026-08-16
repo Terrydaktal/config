@@ -21,7 +21,7 @@ through the DKMS module for every installed CachyOS kernel.
 ```bash
 cd ~/Dev/config/packages/asrock-nct6683-dkms-git
 makepkg --clean --force
-pkexec pacman -U --noconfirm ./asrock-nct6683-dkms-git-*.pkg.tar.zst
+sudo pacman -U --noconfirm ./asrock-nct6683-dkms-git-*.pkg.tar.zst
 ```
 
 The package depends on `dkms` and `linux-cachyos-headers`. For the optional LTS
@@ -31,14 +31,14 @@ fallback, install `linux-cachyos-lts`, `linux-cachyos-lts-headers`, and
 ## Manual verification
 
 ```bash
-pkexec /usr/lib/asrock-nct6683/verify-dkms
+sudo /usr/lib/asrock-nct6683/verify-dkms
 ```
 
 To activate fan control immediately after the first installation without
 rebooting:
 
 ```bash
-pkexec bash -c 'modprobe nct6683 && systemctl restart coolercontrold'
+sudo bash -c 'modprobe nct6683 && systemctl restart coolercontrold'
 ```
 
 Do not reboot into a newly installed kernel until the verifier reports:

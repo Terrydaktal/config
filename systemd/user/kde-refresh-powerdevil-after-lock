@@ -6,66 +6,127 @@ STATE_DIR="${XDG_RUNTIME_DIR:-/run/user/$UID}"
 STATE_FILE="$STATE_DIR/kde-refresh-powerdevil-after-lock.brightness"
 COOLDOWN_SEC=10
 last_refresh=0
+tracking_brightness=true
+pending_event=
 
 log() {
-    printf '%s %s\n' "$(date --iso-8601=seconds)" "$*"
+	printf '%s %s\n' "$(date --iso-8601=seconds)" "$*"
 }
 
 brightness_now() {
-    qdbus6 org.kde.Solid.PowerManagement \
-        /org/kde/Solid/PowerManagement/Actions/BrightnessControl \
-        org.kde.Solid.PowerManagement.Actions.BrightnessControl.brightness 2>/dev/null
+	qdbus6 org.kde.Solid.PowerManagement \
+		/org/kde/Solid/PowerManagement/Actions/BrightnessControl \
+		org.kde.Solid.PowerManagement.Actions.BrightnessControl.brightness 2>/dev/null
 }
 
-remember_brightness() {
-    local value
-    value="$(brightness_now || true)"
-    case "$value" in
-        ''|*[!0-9]*) return 0 ;;
-    esac
-    printf '%s\n' "$value" > "$STATE_FILE"
-    log "remembered brightness $value before lock"
+brightness_max() {
+	qdbus6 org.kde.Solid.PowerManagement \
+		/org/kde/Solid/PowerManagement/Actions/BrightnessControl \
+		org.kde.Solid.PowerManagement.Actions.BrightnessControl.brightnessMax 2>/dev/null
+}
+
+screen_is_locked() {
+	[ "$(qdbus6 org.freedesktop.ScreenSaver /ScreenSaver org.freedesktop.ScreenSaver.GetActive 2>/dev/null)" = true ]
+}
+
+valid_brightness() {
+	local value=$1
+	local maximum=$2
+
+	case "$value:$maximum" in
+	*[!0-9:]* | :* | *:) return 1 ;;
+	esac
+	[ "$maximum" -gt 0 ] && [ "$value" -le "$maximum" ]
+}
+
+remember_current_brightness() {
+	local value maximum previous percent
+
+	screen_is_locked && return 0
+	value="$(brightness_now || true)"
+	maximum="$(brightness_max || true)"
+	valid_brightness "$value" "$maximum" || return 0
+
+	previous="$(sed -n '1p' "$STATE_FILE" 2>/dev/null || true)"
+	[ "$value" = "$previous" ] && return 0
+
+	printf '%s\n' "$value" >"$STATE_FILE"
+	percent=$(((value * 100 + maximum / 2) / maximum))
+	log "remembered brightness ${percent}% while unlocked"
 }
 
 restore_brightness() {
-    local value
-    [ -r "$STATE_FILE" ] || return 0
-    value="$(sed -n '1p' "$STATE_FILE" 2>/dev/null)"
-    case "$value" in
-        ''|*[!0-9]*) return 0 ;;
-    esac
-    qdbus6 org.kde.Solid.PowerManagement \
-        /org/kde/Solid/PowerManagement/Actions/BrightnessControl \
-        org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness "$value" >/dev/null 2>&1 || true
-    log "restored brightness $value after unlock"
+	local value maximum percent
+
+	[ -r "$STATE_FILE" ] || return 0
+	value="$(sed -n '1p' "$STATE_FILE" 2>/dev/null)"
+	maximum="$(brightness_max || true)"
+	valid_brightness "$value" "$maximum" || return 0
+
+	qdbus6 org.kde.Solid.PowerManagement \
+		/org/kde/Solid/PowerManagement/Actions/BrightnessControl \
+		org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightnessSilent "$value" >/dev/null 2>&1 || true
+	percent=$(((value * 100 + maximum / 2) / maximum))
+	log "restored brightness ${percent}% after unlock"
 }
 
 refresh_powerdevil_after_unlock() {
-    local now
-    now="$(date +%s)"
-    if [ $((now - last_refresh)) -lt "$COOLDOWN_SEC" ]; then
-        return 0
-    fi
-    last_refresh="$now"
+	local now
+	now="$(date +%s)"
+	if [ $((now - last_refresh)) -lt "$COOLDOWN_SEC" ]; then
+		return 0
+	fi
+	last_refresh="$now"
 
-    log "unlock detected; refreshing PowerDevil"
-    qdbus6 org.kde.Solid.PowerManagement \
-        /org/kde/Solid/PowerManagement \
-        org.kde.Solid.PowerManagement.reparseConfiguration >/dev/null 2>&1 || true
-    systemctl --user restart plasma-powerdevil.service >/dev/null 2>&1 || true
-    sleep 2
-    restore_brightness
+	log "unlock detected; refreshing PowerDevil"
+	qdbus6 org.kde.Solid.PowerManagement \
+		/org/kde/Solid/PowerManagement \
+		org.kde.Solid.PowerManagement.reparseConfiguration >/dev/null 2>&1 || true
+	systemctl --user restart plasma-powerdevil.service >/dev/null 2>&1 || true
+	sleep 2
+	restore_brightness
+	tracking_brightness=true
 }
 
-log "started; waiting for KDE lock/unlock events"
+if screen_is_locked; then
+	tracking_brightness=false
+else
+	remember_current_brightness
+fi
 
-dbus-monitor "interface='org.freedesktop.ScreenSaver',member='ActiveChanged'" 2>/dev/null | while IFS= read -r line; do
-    case "$line" in
-        *"boolean true"*)
-            remember_brightness
-            ;;
-        *"boolean false"*)
-            refresh_powerdevil_after_unlock
-            ;;
-    esac
-done
+log "started; tracking brightness and waiting for KDE lock/unlock events"
+
+dbus-monitor \
+	"type='signal',interface='org.kde.Solid.PowerManagement.Actions.BrightnessControl',member='brightnessChanged'" \
+	"type='signal',interface='org.kde.screensaver',member='AboutToLock'" \
+	"type='signal',interface='org.freedesktop.ScreenSaver',member='ActiveChanged'" 2>/dev/null |
+	while IFS= read -r line; do
+		case "$line" in
+		*"interface=org.kde.Solid.PowerManagement.Actions.BrightnessControl; member=brightnessChanged"*)
+			if [ "$tracking_brightness" = true ]; then
+				remember_current_brightness
+			fi
+			;;
+		*"interface=org.kde.screensaver; member=AboutToLock"*)
+			tracking_brightness=false
+			remember_current_brightness
+			log "lock imminent; brightness tracking frozen"
+			;;
+		*"interface=org.freedesktop.ScreenSaver; member=ActiveChanged"*)
+			pending_event=active_changed
+			;;
+		*"boolean true"*)
+			if [ "$pending_event" = active_changed ]; then
+				tracking_brightness=false
+				pending_event=
+			fi
+			;;
+		*"boolean false"*)
+			if [ "$pending_event" = active_changed ]; then
+				tracking_brightness=false
+				pending_event=
+				refresh_powerdevil_after_unlock
+			fi
+			;;
+		esac
+	done

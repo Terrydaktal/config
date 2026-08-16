@@ -1,0 +1,7 @@
+[Desktop Entry]
+Exec=/home/lewis/Dev/config/bin/copyq-toggle-window
+Name=
+NoDisplay=true
+StartupNotify=false
+Type=Application
+X-KDE-GlobalAccel-CommandShortcut=true

@@ -17,6 +17,7 @@ Modifier=Meta
 
 [Plugins]
 applicationlauncher-window-feedEnabled=true
+copyq-window-toggleEnabled=true
 dictai-popup-guardEnabled=true
 dictai-positionerEnabled=true
 magiclampEnabled=true
@@ -38,6 +39,10 @@ padding=4
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 
 [Tiling][068353db-b73c-45d9-b9dc-f144ccf93136][84fa6214-e288-4a2d-ab48-b661ae914017]
+padding=4
+tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+
+[Tiling][068353db-b73c-45d9-b9dc-f144ccf93136][99c244db-cefa-4e34-b078-d328c415688e]
 padding=4
 tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
 

@@ -41,3 +41,13 @@ user_pref("privacy.trackingprotection.allow_list.convenience.enabled", false); /
 // ==========================================
 //user_pref("media.hardware-video-decoding.force-enabled", true); // Enable VA-API decoding through nvidia-vaapi-driver
 user_pref("media.hardware-video-decoding.enabled", true);
+
+// ==========================================
+// SPELLCHECK & LANGUAGE
+// ==========================================
+// AutoConfig unregisters Firefox's bundled en-US dictionary. This directory
+// then leaves en-GB-large as the only dictionary available to page editors.
+user_pref("spellchecker.dictionary_path", "/usr/local/share/firefox-dictionaries");
+user_pref("spellchecker.dictionary", "en-GB-large"); // Firefox normalises dictionary filename underscores to hyphens
+user_pref("layout.spellcheckDefault", 2); // 2 = Check all fields (including single-line inputs like search bars)
+user_pref("intl.accept_languages", "en-GB, en"); // Prefer British English content when a site supports it

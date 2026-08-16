@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly KDO_TOOL="/home/lewis/.cargo/bin/kdotool"
+readonly COPYQ_BIN="/home/lewis/.local/bin/copyq"
+readonly COPYQ_CLASS='^com\.github\.hluk\.copyq$'
+
+copyq_window_id="$($KDO_TOOL search --class "$COPYQ_CLASS" --limit 1 getwindowid || true)"
+if [[ -z "$copyq_window_id" ]]; then
+	exec "$COPYQ_BIN" --start-server show
+fi
+
+active_window_id="$($KDO_TOOL getactivewindow getwindowid || true)"
+if [[ "$active_window_id" == "$copyq_window_id" ]]; then
+	exec "$KDO_TOOL" windowminimize "$copyq_window_id"
+fi
+
+exec "$KDO_TOOL" windowactivate "$copyq_window_id"

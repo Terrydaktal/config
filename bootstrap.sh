@@ -68,6 +68,8 @@ configure_system() {
 		"$REPO_DIR/etc/iw-regdomain"
 		"$REPO_DIR/etc/modprobe.d/cfg80211-regdom.conf"
 		"$REPO_DIR/etc/mkinitcpio.conf.d/20-wireless-regdb.conf"
+		"$REPO_DIR/firefox/99-british-dictionary-autoconfig.js"
+		"$REPO_DIR/firefox/british-dictionary.cfg"
 		"$REPO_DIR/packages/asrock-nct6683-dkms-git/PKGBUILD"
 		"$REPO_DIR/packages/asrock-nct6683-dkms-git/verify-dkms"
 		"$REPO_DIR/packages/asrock-nct6683-dkms-git/75-asrock-nct6683-dkms.hook"
@@ -101,7 +103,40 @@ install -Dm644 "$repo_dir/etc/modprobe.d/cfg80211-regdom.conf" \
 install -Dm644 "$repo_dir/etc/mkinitcpio.conf.d/20-wireless-regdb.conf" \
     /etc/mkinitcpio.conf.d/20-wireless-regdb.conf
 rm -f /etc/modprobe.d/nct6687-alias.conf
-pacman -S --needed --noconfirm wireless-regdb
+pacman -S --needed --noconfirm wireless-regdb hunspell-en_gb
+
+install -Dm644 "$repo_dir/firefox/99-british-dictionary-autoconfig.js" \
+    /usr/lib/firefox/defaults/pref/99-british-dictionary-autoconfig.js
+install -Dm644 "$repo_dir/firefox/british-dictionary.cfg" \
+    /usr/lib/firefox/british-dictionary.cfg
+
+# Firefox gives a page language an exact-match priority over the preferred
+# dictionary. AutoConfig removes the bundled en-US entry, while this directory
+# exposes only en-GB-large for all page editors.
+firefox_dictionary_dir=/usr/local/share/firefox-dictionaries
+install -d -m 0755 "$firefox_dictionary_dir"
+find "$firefox_dictionary_dir" -mindepth 1 -maxdepth 1 -delete
+ln -s /usr/share/hunspell/en_GB-large.aff "$firefox_dictionary_dir/en_GB-large.aff"
+ln -s /usr/share/hunspell/en_GB-large.dic "$firefox_dictionary_dir/en_GB-large.dic"
+
+# Remove aliases created by the previous workaround without deleting files
+# owned by a real en-US dictionary package.
+for suffix in aff dic; do
+    legacy_hunspell_alias="/usr/share/hunspell/en_US.$suffix"
+    if [[ -L $legacy_hunspell_alias &&
+          $(readlink -f "$legacy_hunspell_alias") == "/usr/share/hunspell/en_GB-large.$suffix" ]]; then
+        rm -f "$legacy_hunspell_alias"
+    fi
+
+    legacy_myspell_alias="/usr/share/myspell/dicts/en_US.$suffix"
+    if [[ -L $legacy_myspell_alias ]]; then
+        legacy_target=$(readlink "$legacy_myspell_alias")
+        if [[ $legacy_target == "/usr/share/hunspell/en_US.$suffix" ||
+              $legacy_target == "/usr/share/hunspell/en_GB-large.$suffix" ]]; then
+            rm -f "$legacy_myspell_alias"
+        fi
+    fi
+done
 
 nct_package=asrock-nct6683-dkms-git
 nct_install_required=0
@@ -242,6 +277,8 @@ migrate_and_link "~/.local/bin/google-chrome-fast" "$REPO_DIR/bin/google-chrome-
 migrate_and_link "~/.config/systemd/user/wayland-scroll-daemon.service" "$REPO_DIR/systemd/user/wayland-scroll-daemon.service"
 migrate_and_link "~/.config/systemd/user/xremap-meta-keyboard.service" "$REPO_DIR/systemd/user/xremap-meta-keyboard.service"
 migrate_and_link "~/.config/systemd/user/krfb-tunnel.service" "$REPO_DIR/systemd/user/krfb-tunnel.service"
+migrate_and_link "~/.config/systemd/user/copyq-window-toggle-loader.service" "$REPO_DIR/systemd/user/copyq-window-toggle-loader.service"
+migrate_and_link "~/.config/systemd/user/copyq-show-window.service" "$REPO_DIR/systemd/user/copyq-show-window.service"
 
 # New systemd user unit & helper script
 migrate_and_link "~/.config/systemd/user/kde-refresh-powerdevil-after-lock.service" "$REPO_DIR/systemd/user/kde-refresh-powerdevil-after-lock.service"
@@ -269,6 +306,20 @@ if [ -f "$FIREFOX_PROFILES_DIR/profiles.ini" ]; then
 	fi
 	if [ -n "$FF_PROFILE" ]; then
 		migrate_and_link "$FIREFOX_PROFILES_DIR/$FF_PROFILE/user.js" "$REPO_DIR/firefox/user.js"
+
+		# Remove profile dictionary copies created by the superseded workaround.
+		# Firefox now reads the dedicated system directory configured in user.js.
+		legacy_dictionary_dir="$FIREFOX_PROFILES_DIR/$FF_PROFILE/dictionaries"
+		for dict in en-GB en_GB en-GB-large en_GB-large en-US en_US; do
+			for suffix in aff dic; do
+				legacy_dictionary="$legacy_dictionary_dir/$dict.$suffix"
+				system_dictionary="/usr/share/hunspell/en_GB-large.$suffix"
+				if [ -f "$legacy_dictionary" ] && [ -f "$system_dictionary" ] && cmp -s "$legacy_dictionary" "$system_dictionary"; then
+					rm -f "$legacy_dictionary"
+				fi
+			done
+		done
+		rmdir "$legacy_dictionary_dir" 2>/dev/null || true
 	else
 		echo "⚠ Could not determine Firefox default profile from profiles.ini"
 	fi
@@ -377,7 +428,7 @@ systemctl --user daemon-reload
 echo "✔ Reloaded systemd user daemon"
 
 echo -e "\n=== 5. Enabling systemd user services ==="
-for svc in wayland-scroll-daemon.service xremap-meta-keyboard.service kde-refresh-powerdevil-after-lock.service krfb-tunnel.service ydotool.service; do
+for svc in wayland-scroll-daemon.service xremap-meta-keyboard.service copyq-window-toggle-loader.service kde-refresh-powerdevil-after-lock.service krfb-tunnel.service ydotool.service; do
 	if systemctl --user is-enabled "$svc" &>/dev/null; then
 		echo "✔ User service is already enabled: $svc"
 	elif systemctl --user list-unit-files "$svc" &>/dev/null; then

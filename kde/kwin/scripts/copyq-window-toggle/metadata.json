@@ -1,0 +1,20 @@
+{
+  "KPackageStructure": "KWin/Script",
+  "KPlugin": {
+    "Authors": [
+      {
+        "Email": "9lewis9@gmail.com",
+        "Name": "Terrydaktal"
+      }
+    ],
+    "Category": "Window Management",
+    "Description": "Minimizes or activates the existing CopyQ window.",
+    "EnabledByDefault": true,
+    "Id": "copyq-window-toggle",
+    "License": "MIT",
+    "Name": "CopyQ Window Toggle",
+    "Version": "1.0.0"
+  },
+  "X-Plasma-API": "javascript",
+  "X-Plasma-MainScript": "code/main.js"
+}

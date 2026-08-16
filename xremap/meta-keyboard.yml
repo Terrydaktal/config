@@ -18,6 +18,8 @@ keymap:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]
       C-Super-grave:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]
+      C-Shift-Up: F24
+      C-Shift-Super-Up: F24
       Super-5:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/Dev/config/bin/activate-or-launch-chrome.sh"]
       C-1:
