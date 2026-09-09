@@ -8,6 +8,92 @@ set -euo pipefail
 # Bootstrap script to set up symlinks and enable/start systemd services
 
 REPO_DIR="$HOME/Dev/config"
+ssh_machine_role=managed-target
+
+usage() {
+	cat <<'EOF'
+NAME
+    bootstrap.sh - restore the tracked CachyOS workstation configuration
+
+SYNOPSIS
+    bootstrap.sh [--role managed-target|peer-workstation]
+    bootstrap.sh --help
+
+DESCRIPTION
+    Restores the repository-owned user and system configuration. Every role
+    installs the same key-only SSH daemon policy and authorized management keys.
+    The role controls only whether this machine receives an outgoing SSH client
+    identity.
+
+OPTIONS
+    --role ROLE
+        managed-target is the default and creates no outgoing private key.
+        peer-workstation generates ~/.ssh/id_ed25519 when no client key exists.
+    -h, --help
+        Display this help text.
+
+OPERATION
+    managed-target authorizes the repository's management public keys and leaves
+    any existing client private key untouched. peer-workstation does the same,
+    then creates a unique Ed25519 client key pair if both standard key paths are
+    absent. Existing keys are validated and never replaced.
+
+EXAMPLES
+    ./bootstrap.sh
+    ./bootstrap.sh --role managed-target
+    ./bootstrap.sh --role peer-workstation
+
+FILES
+    ~/Dev/config/ssh/authorized_keys
+        Canonical public keys accepted for incoming administration.
+    ~/Dev/config/etc/ssh/sshd_config.d/99-security.conf
+        Canonical SSH daemon policy.
+
+PATHS
+    ~/.ssh/id_ed25519
+        Machine-local outgoing private key used only by peer-workstation.
+    ~/.ssh/id_ed25519.pub
+        Public enrollment key printed when peer-workstation completes.
+
+SECURITY NOTES
+    Private keys are never read into the repository, copied from another machine,
+    or overwritten. Newly generated unattended client keys have no passphrase;
+    protect the user account and ~/.ssh permissions accordingly.
+
+EXIT STATUS
+    0 on success; non-zero for invalid arguments, unsafe key state, failed
+    validation, or an incomplete bootstrap operation.
+
+AUTHORS
+    Terrydaktal and OpenAI Codex.
+EOF
+}
+
+fail() {
+	printf 'bootstrap: %s\n' "$*" >&2
+	exit 1
+}
+
+while (($#)); do
+	case $1 in
+	--role)
+		(($# >= 2)) || fail '--role requires managed-target or peer-workstation'
+		ssh_machine_role=$2
+		shift 2
+		;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*) fail "unknown argument: $1" ;;
+	esac
+done
+
+case $ssh_machine_role in
+managed-target | peer-workstation) ;;
+*) fail "invalid role: $ssh_machine_role" ;;
+esac
+readonly ssh_machine_role
 
 migrate_and_link() {
 	local src="$1"
@@ -61,6 +147,162 @@ migrate_and_link() {
 	fi
 }
 
+link_authorized_keys() {
+	local authorized_keys="$HOME/.ssh/authorized_keys"
+	local canonical_keys="$REPO_DIR/ssh/authorized_keys"
+	local backup
+
+	if [ ! -f "$canonical_keys" ] || [ -L "$canonical_keys" ]; then
+		echo "✗ Canonical authorized_keys is missing or unsafe: $canonical_keys" >&2
+		return 1
+	fi
+	if ! ssh-keygen -lf "$canonical_keys" >/dev/null; then
+		echo "✗ Canonical authorized_keys is invalid: $canonical_keys" >&2
+		return 1
+	fi
+
+	mkdir -p "$HOME/.ssh"
+	chmod 0700 "$HOME/.ssh"
+	chmod 0600 "$canonical_keys"
+
+	if [ -L "$authorized_keys" ]; then
+		if [ "$(readlink -f "$authorized_keys")" = "$canonical_keys" ]; then
+			echo "✔ $authorized_keys is already linked to the canonical key list"
+			return 0
+		fi
+		echo "✗ $authorized_keys points to an unexpected location" >&2
+		return 1
+	fi
+
+	if [ -e "$authorized_keys" ]; then
+		if [ ! -f "$authorized_keys" ]; then
+			echo "✗ $authorized_keys is not a regular file" >&2
+			return 1
+		fi
+		backup="${authorized_keys}.bak.$(date +%Y%m%dT%H%M%S)"
+		if [ -e "$backup" ]; then
+			echo "✗ Refusing to replace existing backup: $backup" >&2
+			return 1
+		fi
+		mv "$authorized_keys" "$backup"
+		echo "✔ Preserved the previous authorized_keys at $backup"
+	fi
+
+	ln -s "$canonical_keys" "$authorized_keys"
+	echo "✔ Linked $authorized_keys -> $canonical_keys"
+}
+
+link_ssh_client_config() {
+	local client_config="$HOME/.ssh/config"
+	local canonical_config="$REPO_DIR/ssh/config"
+	local backup
+
+	if [ ! -f "$canonical_config" ] || [ -L "$canonical_config" ]; then
+		echo "✗ Canonical SSH client config is missing or unsafe: $canonical_config" >&2
+		return 1
+	fi
+	if ! ssh -G -F "$canonical_config" ai >/dev/null; then
+		echo "✗ Canonical SSH client config is invalid: $canonical_config" >&2
+		return 1
+	fi
+
+	mkdir -p "$HOME/.ssh"
+	chmod 0700 "$HOME/.ssh"
+	chmod 0600 "$canonical_config"
+
+	if [ -L "$client_config" ]; then
+		if [ "$(readlink -f "$client_config")" = "$canonical_config" ]; then
+			echo "✔ $client_config is already linked to the canonical client config"
+			return 0
+		fi
+		echo "✗ $client_config points to an unexpected location" >&2
+		return 1
+	fi
+
+	if [ -e "$client_config" ]; then
+		if [ ! -f "$client_config" ]; then
+			echo "✗ $client_config is not a regular file" >&2
+			return 1
+		fi
+		backup="${client_config}.bak.$(date +%Y%m%dT%H%M%S)"
+		if [ -e "$backup" ]; then
+			echo "✗ Refusing to replace existing backup: $backup" >&2
+			return 1
+		fi
+		mv "$client_config" "$backup"
+		echo "✔ Preserved the previous SSH client config at $backup"
+	fi
+
+	ln -s "$canonical_config" "$client_config"
+	echo "✔ Linked $client_config -> $canonical_config"
+}
+
+configure_outgoing_ssh_identity() {
+	local role=$1
+	local private_key="$HOME/.ssh/id_ed25519"
+	local public_key="${private_key}.pub"
+	local private_fingerprint
+	local public_fingerprint
+
+	mkdir -p "$HOME/.ssh"
+	chmod 0700 "$HOME/.ssh"
+
+	if [ "$role" = managed-target ]; then
+		if [ -e "$private_key" ] || [ -e "$public_key" ]; then
+			echo "ℹ managed-target: preserving the existing outgoing SSH identity"
+		else
+			echo "✔ managed-target: no outgoing SSH identity was generated"
+		fi
+		return 0
+	fi
+
+	command -v ssh-keygen >/dev/null 2>&1 || {
+		echo "✗ ssh-keygen is required for the peer-workstation role" >&2
+		return 1
+	}
+
+	if [ -L "$private_key" ] || [ -L "$public_key" ]; then
+		echo "✗ Refusing to use a symlink as a peer-workstation SSH identity" >&2
+		return 1
+	fi
+	if [ ! -e "$private_key" ] && [ -e "$public_key" ]; then
+		echo "✗ $public_key exists without its private key; refusing to overwrite it" >&2
+		return 1
+	fi
+	if [ -e "$private_key" ] && [ ! -e "$public_key" ]; then
+		echo "✗ $private_key exists without $public_key; refusing unattended key repair" >&2
+		return 1
+	fi
+
+	if [ ! -e "$private_key" ]; then
+		(
+			umask 077
+			ssh-keygen -q -t ed25519 -a 100 -N '' \
+				-C "$(id -un)@$(hostname)-peer-workstation" -f "$private_key"
+		)
+		echo "✔ Generated a unique peer-workstation SSH client identity"
+	else
+		echo "✔ Preserving the existing peer-workstation SSH client identity"
+	fi
+
+	[ -f "$private_key" ] && [ -f "$public_key" ] || {
+		echo "✗ Peer-workstation SSH identity is incomplete" >&2
+		return 1
+	}
+	chmod 0600 "$private_key"
+	chmod 0644 "$public_key"
+	private_fingerprint=$(ssh-keygen -lf "$private_key" | awk 'NR == 1 { print $2 }')
+	public_fingerprint=$(ssh-keygen -lf "$public_key" | awk 'NR == 1 { print $2 }')
+	if [ -z "$private_fingerprint" ] || [ "$private_fingerprint" != "$public_fingerprint" ]; then
+		echo "✗ Peer-workstation private and public keys do not match" >&2
+		return 1
+	fi
+
+	printf '✔ Peer-workstation enrollment fingerprint: %s\n' "$public_fingerprint"
+	printf 'PEER_WORKSTATION_SSH_PUBLIC_KEY='
+	cat "$public_key"
+}
+
 configure_system() {
 	local bootstrap_user
 	local required_source
@@ -68,6 +310,7 @@ configure_system() {
 		"$REPO_DIR/etc/iw-regdomain"
 		"$REPO_DIR/etc/modprobe.d/cfg80211-regdom.conf"
 		"$REPO_DIR/etc/mkinitcpio.conf.d/20-wireless-regdb.conf"
+		"$REPO_DIR/etc/ssh/sshd_config.d/99-security.conf"
 		"$REPO_DIR/firefox/99-british-dictionary-autoconfig.js"
 		"$REPO_DIR/firefox/british-dictionary.cfg"
 		"$REPO_DIR/packages/asrock-nct6683-dkms-git/PKGBUILD"
@@ -96,6 +339,26 @@ set -euo pipefail
 repo_dir=$1
 bootstrap_user=$2
 package_dir="$repo_dir/packages/asrock-nct6683-dkms-git"
+sshd_policy_source="$repo_dir/etc/ssh/sshd_config.d/99-security.conf"
+sshd_policy_target=/etc/ssh/sshd_config.d/99-security.conf
+legacy_installer_policy=/etc/ssh/sshd_config.d/20-cachyos-remote-admin.conf
+
+command -v sshd >/dev/null 2>&1 || {
+    echo "OpenSSH server is required before applying the SSH policy" >&2
+    exit 1
+}
+sshd -t -f "$sshd_policy_source"
+install -Dm644 "$sshd_policy_source" "$sshd_policy_target"
+if [[ -f $legacy_installer_policy ]] && cmp -s "$legacy_installer_policy" <(
+    printf "%s\n" \
+        "PermitRootLogin prohibit-password" \
+        "PasswordAuthentication no" \
+        "KbdInteractiveAuthentication no" \
+        "PubkeyAuthentication yes"
+); then
+    rm -f "$legacy_installer_policy"
+fi
+sshd -t
 
 install -Dm644 "$repo_dir/etc/iw-regdomain" /etc/iw-regdomain
 install -Dm644 "$repo_dir/etc/modprobe.d/cfg80211-regdom.conf" \
@@ -197,6 +460,7 @@ enable_system_unit systemd-timesyncd.service now
 enable_system_unit nvidia-power-limit.service enable
 enable_system_unit ufw.service now
 enable_system_unit sshd.service now
+systemctl reload sshd.service
 ' bash "$REPO_DIR" "$bootstrap_user"
 }
 
@@ -272,6 +536,7 @@ migrate_and_link "~/.local/share/applications/org.xfce.mousepad.desktop" "$REPO_
 
 # Chrome launcher wrapper
 migrate_and_link "~/.local/bin/google-chrome-fast" "$REPO_DIR/bin/google-chrome-fast"
+migrate_and_link "~/.config/chrome-flags.conf" "$REPO_DIR/chrome/chrome-flags.conf"
 
 # Systemd user units (already in repo)
 migrate_and_link "~/.config/systemd/user/wayland-scroll-daemon.service" "$REPO_DIR/systemd/user/wayland-scroll-daemon.service"
@@ -285,8 +550,9 @@ migrate_and_link "~/.config/systemd/user/kde-refresh-powerdevil-after-lock.servi
 migrate_and_link "~/.local/bin/kde-refresh-powerdevil-after-lock" "$REPO_DIR/systemd/user/kde-refresh-powerdevil-after-lock"
 
 # SSH user configs
-migrate_and_link "~/.ssh/config" "$REPO_DIR/ssh/config"
-migrate_and_link "~/.ssh/authorized_keys" "$REPO_DIR/ssh/authorized_keys"
+link_ssh_client_config
+link_authorized_keys
+configure_outgoing_ssh_identity "$ssh_machine_role"
 
 # Firefox user.js
 # profiles.ini has a random prefix per installation (e.g. nbw40052.default-release).
@@ -413,14 +679,13 @@ for f in "${ufw_files[@]}"; do
 	fi
 done
 
-# Track custom SSH daemon configuration
-mkdir -p "$REPO_DIR/etc/ssh/sshd_config.d"
-conf=99-security.conf
-if [ -f "/etc/ssh/sshd_config.d/$conf" ]; then
-	cp "/etc/ssh/sshd_config.d/$conf" "$REPO_DIR/etc/ssh/sshd_config.d/$conf"
-	echo "✔ Copied /etc/ssh/sshd_config.d/$conf to repo"
+# Verify the repository-owned SSH daemon configuration. configure_system()
+# restores this file after the non-privileged tracking phase.
+sshd_policy=/etc/ssh/sshd_config.d/99-security.conf
+if [ -f "$sshd_policy" ] && cmp -s "$sshd_policy" "$REPO_DIR/etc/ssh/sshd_config.d/99-security.conf"; then
+	echo "✔ $sshd_policy matches the repository"
 else
-	echo "⚠ /etc/ssh/sshd_config.d/$conf not found"
+	echo "ℹ $sshd_policy will be restored from the repository"
 fi
 
 echo -e "\n=== 4. Reloading systemd user manager ==="
@@ -444,4 +709,4 @@ echo "Administrator authentication will restore system configuration, verify fan
 configure_system
 echo "✔ System configuration restored and verified"
 
-echo -e "\n★ Bootstrap complete! Please verify with 'git status' in ~/Dev/config."
+echo -e "\n★ Bootstrap complete (SSH role: $ssh_machine_role)! Please verify with 'git status' in ~/Dev/config."

@@ -5,7 +5,4 @@ if (($# == 0)); then
 	set -- --new-window https://www.google.com/
 fi
 
-exec /usr/bin/google-chrome-stable \
-	--ozone-platform=wayland \
-	--disable-features=Vulkan \
-	"$@"
+exec /usr/bin/google-chrome-stable "$@"

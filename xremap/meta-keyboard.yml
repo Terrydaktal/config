@@ -7,6 +7,18 @@
 # the number key leak into the focused application, gives Meta+5 a direct
 # Chrome launch fallback, and exposes launcher shortcuts from the same device.
 keymap:
+  # Match the mouse's keyboard endpoint, not Meta itself or the wheel/buttons.
+  - name: Mouse DPI toggles desktop depth preview
+    device:
+      only: /dev/input/by-id/usb-04d9_USB_Gaming_Mouse-if01-event-kbd
+    exact_match: true
+    remap:
+      Super-grave:
+        launch: ["/usr/bin/qdbus6", "org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component.invokeShortcut", "ToggleDesktopDepthPreview"]
+      C-grave:
+        launch: ["/usr/bin/qdbus6", "org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component.invokeShortcut", "ToggleDesktopDepthPreview"]
+      C-Super-grave:
+        launch: ["/usr/bin/qdbus6", "org.kde.kglobalaccel", "/component/kwin", "org.kde.kglobalaccel.Component.invokeShortcut", "ToggleDesktopDepthPreview"]
   - name: Handle normalized launcher shortcuts
     exact_match: true
     remap:

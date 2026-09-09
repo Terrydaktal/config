@@ -1,0 +1,7 @@
+# 192.168.50.30 booted into CachyOS
+# ED25519 SHA256:af1gTMrlQjHF0/pT0GlgzNd/aQkjq1/qSUXhRALHoQo
+lewis-linux ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFRGvcVhofq6WxQsDB40IJUVuuorcKxMBdHCWO6WvuHB
+
+# 192.168.50.30 booted into Windows
+# ED25519 SHA256:1/uQdnvN5Fhg5+UzaAvyo/MdV1kUYTYnt1BMAZatQ7c
+lewis-windows ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAnaZ6MSAyVMTvieuUKgcWWwIoCOGQKtsuVX5swHCvSl

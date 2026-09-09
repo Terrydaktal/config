@@ -55,7 +55,8 @@ On lock, it records the current brightness. On unlock, it applies a ten-second c
 | **Meta + Scroll Up** | Restore Window | Un-minimizes the last window in our stack. |
 | **Ctrl + Meta + Middle Click** | Close Window | Captures the window under the cursor, then retries that same ID briefly until KWin removes it. |
 | **Mouse Back/Forward in `xfce4-terminal`** | Directory History | Emits `Alt+Left` / `Alt+Right`, which fish binds to `prevd` / `nextd`. |
-| **Meta + Grave, Ctrl + Grave, or Ctrl + Meta + Grave** | Application Launcher | Opens `~/.local/bin/applicationlauncher` through the environment-scoped xremap launcher wrapper. |
+| **Mouse DPI button (mouse-originated launcher combination)** | Desktop Depth Preview | The mouse keyboard endpoint's Meta + Grave, Ctrl + Grave, and Ctrl + Meta + Grave combinations invoke KWin's existing `ToggleDesktopDepthPreview` action, the same action as Meta + Z. |
+| **Meta + Grave, Ctrl + Grave, or Ctrl + Meta + Grave on the keyboard** | Application Launcher | Opens `~/.local/bin/applicationlauncher` through the environment-scoped xremap launcher wrapper. |
 | **Ctrl + Meta + [1-9]** | Launch New App | Handled directly by `xremap-meta-keyboard.service`. Slot 4 uses `firefox-new-window-fast` to open Google in a new Firefox window; the other slots run `launch-taskbar-app.sh N` to open a fresh instance of the Nth pinned app. |
 | **Shift + Scroll** | Desktop Zoom | Triggers KWin Desktop Zoom via DBus; zero throttle (smooth). |
 | **Meta + Ctrl + Scroll** | No Action | Deliberately ignored so Ctrl-modified scrolling cannot minimize, restore, or zoom through the Meta wheel path. |
@@ -68,7 +69,7 @@ The system is managed as a standard **systemd user service**.
 *   **Restore Full Shortcut Stack**: If shortcut handling stops working after stopping services or probing input devices, restart the whole user-service chain with `systemctl --user restart xremap-meta-keyboard.service wayland-scroll-daemon.service ydotool.service`
 *   **Check Status**: `systemctl --user status wayland-scroll-daemon.service`
 *   **View Logs**: `journalctl --user -u wayland-scroll-daemon.service -f`
-*   **Reload xremap Keyboard Normalizer**: `systemctl --user restart xremap-meta-keyboard.service`
+*   **Reload xremap Keyboard Normalizer Config**: Edits to `xremap/meta-keyboard.yml` reload automatically through `--watch=config,device`; no service or compositor restart is needed. The mouse-only override precedes the shared map and does not remap Meta itself, wheel events, or other mouse buttons.
 *   **Boot Ordering**: `wayland-scroll-daemon.service` has `Requires=` and `After=` on `xremap-meta-keyboard.service`, so the scroll daemon waits for the normalized keyboard before selecting devices. Both units disable systemd's start-rate limit and continue retrying when the configured keyboard or mouse is absent during boot.
 *   **Process Ownership**: `xremap-meta-keyboard.service` uses `KillMode=control-group`, while its launch mappings call `bin/xremap-launch-scoped`. The wrapper places each newly launched GUI application in a transient user service, preventing future application windows from becoming xremap service children. Those transient services use `ExitType=cgroup`, so a launcher may exit after backgrounding the GUI without systemd terminating that child. Windows launched by an older service instance remain in that old cgroup until closed or the session is restarted, so apply the unit change at a planned restart rather than during active work.
 
@@ -77,5 +78,6 @@ The system is managed as a standard **systemd user service**.
 *   **Shared Launcher Scripts**: `~/Dev/config/bin/launch-taskbar-app.sh` and `~/Dev/config/bin/firefox-new-window-fast`
 *   **Service File**: `~/Dev/config/systemd/user/wayland-scroll-daemon.service`, installed to `~/.config/systemd/user/wayland-scroll-daemon.service`.
 *   **xremap Keyboard Normalizer Config**: `~/Dev/config/xremap/meta-keyboard.yml`
+*   **xremap Shortcut Regression Tests**: `~/Dev/config/xremap/test_meta_keyboard.py`. From the repository root, run `UV_CACHE_DIR=/data/.cache/uv uv run --no-project --python /usr/bin/python3 python xremap/test_meta_keyboard.py` (uses the system PyYAML package). Checks device scope, rule precedence, exact combinations, and unchanged shared shortcuts without reading input devices or invoking actions.
 *   **xremap Keyboard Normalizer Service**: `~/Dev/config/systemd/user/xremap-meta-keyboard.service`, installed to `~/.config/systemd/user/xremap-meta-keyboard.service`.
 *   **xremap Launcher Wrapper**: `~/Dev/config/bin/xremap-launch-scoped`, which starts GUI launch actions in transient `systemd --user` services.
