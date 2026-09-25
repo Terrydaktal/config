@@ -25,15 +25,15 @@ This directory contains Xfce Terminal configuration files and key/mouse behavior
 
 ### Command and Session
 
-- Runs custom command `fish`.
+- Runs custom command `/home/lewis/.local/bin/fish`.
 - `command-login-shell=false`.
 - `run-custom-command=true`.
 
 ### Appearance and Behavior
 
-- Font: `Hack Tight 12`.
+- Font: `Hack Tight 11`.
 - Background: solid black (`#000000000000`), darkness `1`.
-- Cursor shape: block.
+- Cursor shape: I-beam.
 - Scrollbar: none.
 - Scrollback lines: `50000`.
 - Menubar default: hidden.
@@ -64,6 +64,9 @@ This directory contains Xfce Terminal configuration files and key/mouse behavior
 - Directory click payload wrappers:
   - prefix: `__XFCE_CLICK__:`
   - suffix: `\x1f`
+- `misc-prefer-mouse-selection=true`: in the patched XFCE Terminal, normal dragging selects visible terminal text even when tmux captures the mouse. Shift+drag sends mouse input to tmux; the wheel still scrolls tmux history. Select across multiple history pages with tmux copy mode.
+
+`bootstrap.sh` links `~/.tmux.conf` to `../tmux/tmux.conf`. That file keeps tmux mouse handling on and retains up to one million history lines. The terminal selection preference is stored in Xfconf; apply it in a running desktop session with `xfconf-query -c xfce4-terminal -p /misc-prefer-mouse-selection -n -t bool -s true`.
 
 ## Mouse Behavior Notes
 

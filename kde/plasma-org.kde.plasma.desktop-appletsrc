@@ -192,4 +192,4 @@ AppletOrder=27
 
 [ScreenMapping]
 itemsOnDisabledScreens=
-screenMapping=desktop:/backups,0,714198cd-af77-45a5-bc50-082fd5abe07e,desktop:/boot,0,714198cd-af77-45a5-bc50-082fd5abe07e
+screenMapping=desktop:/boot,0,714198cd-af77-45a5-bc50-082fd5abe07e,desktop:/backups,0,714198cd-af77-45a5-bc50-082fd5abe07e
