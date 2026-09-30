@@ -53,7 +53,7 @@ class MouseShortcutTests(unittest.TestCase):
     def test_other_shared_shortcuts_are_unchanged(self):
         expected = {key: LAUNCHER for key in LAUNCHER_KEYS}
         expected.update({
-            "KEY_KPENTER": None,
+            "KEY_KPENTER": "KEY_MUTE",
             "C-w": None,
             "C-Shift-Up": "F24",
             "C-Shift-Super-Up": "F24",

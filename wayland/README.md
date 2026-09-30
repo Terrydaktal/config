@@ -57,6 +57,7 @@ On lock, it records the current brightness. On unlock, it applies a ten-second c
 | **Mouse Back/Forward in `xfce4-terminal`** | Directory History | Emits `Alt+Left` / `Alt+Right`, which fish binds to `prevd` / `nextd`. |
 | **Mouse DPI button (mouse-originated launcher combination)** | Desktop Depth Preview | The mouse keyboard endpoint's Meta + Grave, Ctrl + Grave, and Ctrl + Meta + Grave combinations invoke KWin's existing `ToggleDesktopDepthPreview` action, the same action as Meta + Z. |
 | **Meta + Grave, Ctrl + Grave, or Ctrl + Meta + Grave on the keyboard** | Application Launcher | Opens `~/.local/bin/applicationlauncher` through the environment-scoped xremap launcher wrapper. |
+| **Numpad Enter** | Toggle Audio Mute | xremap emits `KEY_MUTE`, handled by KDE's Audio Volume mute shortcut. |
 | **Ctrl + Meta + [1-9]** | Launch New App | Handled directly by `xremap-meta-keyboard.service`. Slot 4 uses `firefox-new-window-fast` to open Google in a new Firefox window; the other slots run `launch-taskbar-app.sh N` to open a fresh instance of the Nth pinned app. |
 | **Shift + Scroll** | Desktop Zoom | Triggers KWin Desktop Zoom via DBus; zero throttle (smooth). |
 | **Meta + Ctrl + Scroll** | No Action | Deliberately ignored so Ctrl-modified scrolling cannot minimize, restore, or zoom through the Meta wheel path. |

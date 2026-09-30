@@ -51,5 +51,5 @@
   <property name="title-mode" type="string" value="TERMINAL_TITLE_PREPEND"/>
   <property name="misc-hyperlink-tooltips-enabled" type="bool" value="false"/>
   <property name="misc-auto-detect-file-paths" type="bool" value="true"/>
-  <property name="misc-prefer-mouse-selection" type="bool" value="true"/>
+  <property name="misc-prefer-mouse-selection" type="bool" value="false"/>
 </channel>

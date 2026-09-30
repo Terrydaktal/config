@@ -22,7 +22,7 @@ keymap:
   - name: Handle normalized launcher shortcuts
     exact_match: true
     remap:
-      KEY_KPENTER: null
+      KEY_KPENTER: KEY_MUTE
       C-w: null
       Super-grave:
         launch: ["/home/lewis/Dev/config/bin/xremap-launch-scoped", "/home/lewis/.local/bin/applicationlauncher"]

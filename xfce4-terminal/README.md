@@ -14,7 +14,8 @@ This directory contains Xfce Terminal configuration files and key/mouse behavior
 - `paste` is bound to `Ctrl+V`.
 - `zoom-in` and `zoom-out` are explicitly unbound.
 - Many other actions remain at defaults or commented.
-- Because `Ctrl+C` is mapped to copy in terminal UI, SIGINT is available on `Ctrl+Shift+C`.
+- With the patched terminal, `Ctrl+C` copies a native selection or the attached local tmux history selection without clearing it or scrolling to the bottom. Otherwise it reaches the foreground application, so application-owned selections such as Codex's can use their own copy handler.
+- With no selection, `Ctrl+C` can interrupt the foreground application. `Ctrl+Shift+C` remains available for SIGINT.
 
 ## `terminalrc`
 
@@ -64,9 +65,27 @@ This directory contains Xfce Terminal configuration files and key/mouse behavior
 - Directory click payload wrappers:
   - prefix: `__XFCE_CLICK__:`
   - suffix: `\x1f`
-- `misc-prefer-mouse-selection=true`: in the patched XFCE Terminal, normal dragging selects visible terminal text even when tmux captures the mouse. Shift+drag sends mouse input to tmux; the wheel still scrolls tmux history. Select across multiple history pages with tmux copy mode.
+- `misc-prefer-mouse-selection=false`: ordinary clicks reach applications such as htop and netmgr. Shift+drag makes a native terminal selection when an application captures the mouse.
 
-`bootstrap.sh` links `~/.tmux.conf` to `../tmux/tmux.conf`. That file keeps tmux mouse handling on and retains up to one million history lines. The terminal selection preference is stored in Xfconf; apply it in a running desktop session with `xfconf-query -c xfce4-terminal -p /misc-prefer-mouse-selection -n -t bool -s true`.
+`bootstrap.sh` links `~/.tmux.conf` and `~/.config/tmux-simple/tmux.conf` (or the
+equivalent under `XDG_CONFIG_HOME`) to `../tmux-simple/tmux.conf`. The installed
+`tmux` command is the patched native binary, not a Python launcher. A small Fish
+function selects the existing private session socket unless `-S`, `-L`, or an
+inherited `TMUX` selects another server. Attachment hooks preserve desktop
+clipboard access and automatically start the standalone `tmux-mosh` sizing
+helper when Mosh is detected. The previous configuration remains in
+`../legacy/tmux/tmux.conf`; foreign config files and links are not removed.
+
+The active configuration enables application mouse forwarding and history
+browsing without a prefix or status bar. Mouse selection copies without
+jumping to the bottom; typing returns to live input. Wheel scrolling and
+Shift+PageUp/Down browse retained history. Keep
+`misc-prefer-mouse-selection=false` so ordinary clicks reach mouse-aware
+applications. Shift+drag remains available for native terminal selection.
+These settings require the patched backend; do not load them into vanilla tmux.
+The config migration does not restart existing sessions or modify pi-opsec.
+
+The terminal selection preference is stored in Xfconf; apply it in a running desktop session with `xfconf-query -c xfce4-terminal -p /misc-prefer-mouse-selection -n -t bool -s false`.
 
 ## Mouse Behavior Notes
 

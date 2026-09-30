@@ -282,6 +282,8 @@ _launch=Num++
 ShowOSD=Display
 
 [services][org.kde.spectacle.desktop]
+CurrentMonitorScreenShot=none
+OpenWithoutScreenshot=none
 RecordRegion=none
 RecordScreen=none
 RecordWindow=none

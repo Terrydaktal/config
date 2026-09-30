@@ -18,6 +18,7 @@ user_pref("dom.forms.autocomplete.formautofill", true); // Enable form autofill
 // SCROLLING SPEED & PHYSICS
 // ==========================================
 user_pref("general.autoScroll", true); // Enable middle-click autoscroll
+user_pref("middlemouse.paste", false); // Do not paste the primary selection on middle-click
 user_pref("mousewheel.default.delta_multiplier_y", 200); // Faster scroll distance
 user_pref("general.smoothScroll", true);
 user_pref("general.smoothScroll.mouseWheel.durationMaxMS", 100); // Snappy scroll animation

@@ -522,8 +522,8 @@ migrate_and_link "~/.config/applicationlauncher/window_size.txt" "$REPO_DIR/appl
 # Git config
 migrate_and_link "~/.gitconfig" "$REPO_DIR/git/gitconfig"
 
-# Terminal multiplexer config
-migrate_and_link "$HOME/.tmux.conf" "$REPO_DIR/tmux/tmux.conf"
+# Native patched tmux loads the canonical config through ~/.tmux.conf.
+bash "$REPO_DIR/tmux-simple/link.sh"
 
 # CopyQ autostart
 migrate_and_link "~/.config/autostart/com.github.hluk.copyq.desktop" "$REPO_DIR/autostart/com.github.hluk.copyq.desktop"
