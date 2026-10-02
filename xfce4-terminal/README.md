@@ -77,8 +77,11 @@ helper when Mosh is detected. The previous configuration remains in
 `../legacy/tmux/tmux.conf`; foreign config files and links are not removed.
 
 The active configuration enables application mouse forwarding and history
-browsing without a prefix or status bar. Mouse selection copies without
-jumping to the bottom; typing returns to live input. Wheel scrolling and
+browsing without a prefix or status bar. Dragging, double-clicking, and
+triple-clicking select text without changing the clipboard. `Ctrl+C` copies
+the selection without clearing it or jumping to the bottom; without a
+selection it leaves copy mode and forwards `Ctrl+C` to the foreground
+application. Typing returns to live input. Wheel scrolling and
 Shift+PageUp/Down browse retained history. Keep
 `misc-prefer-mouse-selection=false` so ordinary clicks reach mouse-aware
 applications. Shift+drag remains available for native terminal selection.
