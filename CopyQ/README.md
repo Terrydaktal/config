@@ -22,6 +22,8 @@ This Wayland override bypasses CopyQ's native `window_paste_with_ctrl_v_regex` s
 
 The script override makes CopyQ the Wayland clipboard provider after every valid external copy. It preserves all captured non-internal MIME formats, including images, so clipboard contents remain pasteable after the source application exits.
 
+This persistence handling applies only to explicit clipboard copies. Mouse selections use CopyQ's original callback, so highlighting text in an X11 application such as Mousepad cannot replace the copied clipboard contents, even briefly.
+
 If another application publishes a genuinely zero-byte clipboard offer, the override republishes the latest stored CopyQ item. This also means that applications cannot intentionally clear the clipboard to remove sensitive data; copy different content or clear CopyQ history before clearing the clipboard when that behavior is required.
 
 ## Requirements

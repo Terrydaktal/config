@@ -44,7 +44,15 @@ function copyqRestoreLastStoredClipboardItem() {
     return true;
 }
 
+var copyqDefaultOnClipboardChanged = global.onClipboardChanged;
+
 global.onClipboardChanged = function() {
+    // PRIMARY changes are selections, not explicit clipboard copies.
+    if (!isClipboard()) {
+        copyqDefaultOnClipboardChanged();
+        return;
+    }
+
     var item = copyqClipboardPayloadFromCurrentData();
 
     if (!copyqClipboardPayloadHasBytes(item)) {
