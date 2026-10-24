@@ -53,4 +53,6 @@ release_keys
 # Give CopyQ a moment to hide and return focus to the previous window.
 sleep 0.03
 
-ydotool key --key-delay 0 42:1 110:1 110:0 42:0
+# Use the same clipboard paste action as a physical Ctrl+V. Shift+Insert can
+# select PRIMARY instead and bypass XFCE Terminal's image-only clipboard path.
+ydotool key --key-delay 0 29:1 47:1 47:0 29:0

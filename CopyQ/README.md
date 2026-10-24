@@ -8,12 +8,15 @@ This directory contains the CopyQ configuration used for Wayland paste support.
 - `copyq-commands.ini`: CopyQ command list, including the Enter/paste override, symlinked from `~/.config/copyq/copyq-commands.ini`.
 - `copyq-wayland-paste.sh`: helper used by the command override to paste with `ydotool`.
 - `copyq_script_override.js`: source for the JavaScript override embedded in `copyq-commands.ini`.
+- `test_wayland_paste.sh` and `test-tools/`: regression test and mock input recorder; never send real keyboard events.
 
 ## Paste Flow
 
 Pressing Enter on a selected CopyQ item calls the `global.paste()` override in `copyq-commands.ini`. The override hides CopyQ, then runs `copyq-wayland-paste.sh` with `YDOTOOL_SOCKET` set to the user runtime socket.
 
-The helper uses `flock` so repeated Enter presses do not overlap. It releases common stuck modifier keys, ensures `ydotoold` is reachable, starts either `ydotool.service` or `ydotoold.service` if needed, waits briefly for CopyQ to return focus to the previous window, then sends `Shift+Insert`.
+The helper uses `flock` so repeated Enter presses do not overlap. It releases common stuck modifier keys, ensures `ydotoold` is reachable, starts either `ydotool.service` or `ydotoold.service` if needed, waits briefly for CopyQ to return focus to the previous window, then sends `Ctrl+V`. This matches an ordinary clipboard paste, including XFCE Terminal's image-only fallback for Codex. `Shift+Insert` can select PRIMARY instead, so it is not used.
+
+This Wayland override bypasses CopyQ's native `window_paste_with_ctrl_v_regex` setting. The helper is executed on each paste, so editing it takes effect without restarting CopyQ. Run `bash CopyQ/test_wayland_paste.sh` from the config repository root to verify the shortcut and held-modifier guard with a mock `ydotool`.
 
 ## Clipboard Persistence
 
