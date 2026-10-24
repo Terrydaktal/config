@@ -1,0 +1,8 @@
+[view]
+color-scheme='oblivion'
+font-name='Monospace 17'
+insert-spaces=true
+show-line-numbers=true
+tab-width=uint32 4
+use-default-monospace-font=false
+word-wrap=true

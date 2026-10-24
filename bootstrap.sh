@@ -536,6 +536,11 @@ migrate_and_link "~/.config/autostart/import-environment.desktop" "$REPO_DIR/aut
 # Session environment
 migrate_and_link "~/.config/environment.d/90-nvidia-vaapi.conf" "$REPO_DIR/environment.d/90-nvidia-vaapi.conf"
 
+# Mousepad preferences live in dconf; import only the tracked keys, not session state.
+command -v dconf >/dev/null 2>&1 || fail 'dconf is required to restore Mousepad preferences'
+dconf load /org/xfce/mousepad/preferences/ <"$REPO_DIR/mousepad/preferences.dconf"
+echo "Restored Mousepad preferences from $REPO_DIR/mousepad/preferences.dconf"
+
 # Mousepad desktop override launcher
 migrate_and_link "~/.local/share/applications/org.xfce.mousepad.desktop" "$REPO_DIR/applications/org.xfce.mousepad.desktop"
 
