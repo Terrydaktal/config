@@ -1,4 +1,4 @@
-// The first AutoConfig line must be a comment.
+// Keep British English as the only dictionary available to page editors.
 (() => {
   const { classes: Cc, interfaces: Ci, utils: Cu } = Components;
   const observerService = Cc["@mozilla.org/observer-service;1"].getService(

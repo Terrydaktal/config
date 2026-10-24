@@ -311,8 +311,13 @@ configure_system() {
 		"$REPO_DIR/etc/modprobe.d/cfg80211-regdom.conf"
 		"$REPO_DIR/etc/mkinitcpio.conf.d/20-wireless-regdb.conf"
 		"$REPO_DIR/etc/ssh/sshd_config.d/99-security.conf"
-		"$REPO_DIR/firefox/99-british-dictionary-autoconfig.js"
-		"$REPO_DIR/firefox/british-dictionary.cfg"
+		"$REPO_DIR/firefox/install-autoconfig.sh"
+		"$REPO_DIR/firefox/99-firefox-autoconfig.js"
+		"$REPO_DIR/firefox/firefox-autoconfig.cfg"
+		"$REPO_DIR/firefox/autoconfig/british-dictionary.js"
+		"$REPO_DIR/firefox/autoconfig/reverse-autoscroll.js"
+		"$REPO_DIR/firefox/autoscroll/ReverseAutoScrollChild.sys.mjs"
+		"$REPO_DIR/firefox/autoscroll/scroll-range.sys.mjs"
 		"$REPO_DIR/packages/asrock-nct6683-dkms-git/PKGBUILD"
 		"$REPO_DIR/packages/asrock-nct6683-dkms-git/verify-dkms"
 		"$REPO_DIR/packages/asrock-nct6683-dkms-git/75-asrock-nct6683-dkms.hook"
@@ -368,10 +373,7 @@ install -Dm644 "$repo_dir/etc/mkinitcpio.conf.d/20-wireless-regdb.conf" \
 rm -f /etc/modprobe.d/nct6687-alias.conf
 pacman -S --needed --noconfirm wireless-regdb hunspell-en_gb
 
-install -Dm644 "$repo_dir/firefox/99-british-dictionary-autoconfig.js" \
-    /usr/lib/firefox/defaults/pref/99-british-dictionary-autoconfig.js
-install -Dm644 "$repo_dir/firefox/british-dictionary.cfg" \
-    /usr/lib/firefox/british-dictionary.cfg
+bash "$repo_dir/firefox/install-autoconfig.sh"
 
 # Firefox gives a page language an exact-match priority over the preferred
 # dictionary. AutoConfig removes the bundled en-US entry, while this directory
