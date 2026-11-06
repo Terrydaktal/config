@@ -1,0 +1,11 @@
+[
+  {"id": "PASTE-FOCUS-DELAYED", "mode": "delayed", "exit_code": 0, "pastes": 1, "focus_queries": 4},
+  {"id": "PASTE-FOCUS-COPYQ", "mode": "stuck", "exit_code": 6, "pastes": 0, "focus_queries": 0},
+  {"id": "PASTE-FOCUS-DESKTOP", "mode": "desktop", "exit_code": 6, "pastes": 0, "focus_queries": 0},
+  {"id": "PASTE-FOCUS-NONE", "mode": "none", "exit_code": 6, "pastes": 0, "focus_queries": 0},
+  {"id": "PASTE-FOCUS-UNAVAILABLE", "mode": "unavailable", "exit_code": 6, "pastes": 0, "focus_queries": 0},
+  {"id": "PASTE-FOCUS-HUNG", "mode": "hung", "exit_code": 6, "pastes": 0, "focus_queries": 0},
+  {"id": "PASTE-MODIFIER-DURING-FOCUS", "mode": "held-after-focus", "exit_code": 5, "pastes": 0, "focus_queries": 0},
+  {"id": "PASTE-DESKTOP-PATH", "mode": "desktop-path", "exit_code": 0, "pastes": 1, "focus_queries": 1},
+  {"id": "PASTE-MISSING-FOCUS-TOOL", "mode": "missing-tool", "exit_code": 6, "pastes": 0, "focus_queries": 0}
+]

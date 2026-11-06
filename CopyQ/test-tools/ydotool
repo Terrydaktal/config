@@ -1,3 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >>"${PASTE_TEST_RECORD:?test-only recorder}"
+if [[ "$*" == 'key --key-delay 0 29:1 47:1 47:0 29:0' ]]; then
+	checks=0
+	if [[ -f "${PASTE_FOCUS_RECORD:-}" ]]; then
+		checks=$(wc -l <"$PASTE_FOCUS_RECORD")
+	fi
+	printf 'focus-before-paste %s\n' "$checks" >>"$PASTE_TEST_RECORD"
+fi

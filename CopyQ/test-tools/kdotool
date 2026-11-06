@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$*" >>"${PASTE_FOCUS_RECORD:?test-only focus recorder}"
+case "${PASTE_FOCUS_MODE:-ready}" in
+ready)
+	printf 'org.telegram.desktop\n'
+	;;
+delayed)
+	checks=$(wc -l <"$PASTE_FOCUS_RECORD")
+	if ((checks == 1)); then
+		printf 'com.github.hluk.copyq\n'
+	elif ((checks == 2)); then
+		printf 'org.kde.plasmashell\n'
+	elif ((checks == 3)); then
+		printf 'null\n'
+	else
+		printf 'org.telegram.desktop\n'
+	fi
+	;;
+stuck)
+	printf 'com.github.hluk.copyq\n'
+	;;
+desktop)
+	printf 'org.kde.plasmashell\n'
+	;;
+none)
+	printf 'null\n'
+	;;
+unavailable)
+	exit 1
+	;;
+hung)
+	exec sleep 5
+	;;
+held-after-focus)
+	printf 'CTRL=1\n' >"${WAYLAND_MODIFIER_STATE_FILE:?test-only modifier state}"
+	printf 'org.telegram.desktop\n'
+	;;
+*)
+	printf 'Unknown focus fixture\n' >&2
+	exit 2
+	;;
+esac
