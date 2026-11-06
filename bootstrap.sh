@@ -524,6 +524,10 @@ migrate_and_link "~/.config/applicationlauncher/window_size.txt" "$REPO_DIR/appl
 # Git config
 migrate_and_link "~/.gitconfig" "$REPO_DIR/git/gitconfig"
 
+# Codex CLI settings only; credentials, history and runtime state stay in ~/.codex.
+migrate_and_link "$HOME/.codex/config.toml" "$REPO_DIR/codex/config.toml"
+chmod 600 "$REPO_DIR/codex/config.toml"
+
 # Native patched tmux loads the canonical config through ~/.tmux.conf.
 bash "$REPO_DIR/tmux-simple/link.sh"
 

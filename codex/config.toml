@@ -1,0 +1,28 @@
+model = "gpt-6.1-sol"
+model_reasoning_effort = "max"
+
+approval_policy = "on-request"
+sandbox_mode    = "workspace-write"
+personality = "pragmatic"
+web_search = "live"
+service_tier = "default"
+
+[features]
+steer = true
+
+[history]
+persistence = "save-all"
+max_bytes = 0
+
+[sandbox_workspace_write]
+network_access = true
+writable_roots = ["/data", "/home/lewis/.local/share/uv", "/trash"]
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[tui]
+terminal_title = ["app-name", "activity", "current-dir", "thread-title"]
+fullscreen_transcript = false
+copy_on_select = "never"
+right_click_paste = "off"
