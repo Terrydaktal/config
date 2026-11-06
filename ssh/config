@@ -1,42 +1,15 @@
-#knowthatstuff and dictai
 Host *
     ServerAliveInterval 60
     ServerAliveCountMax 3
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    UserKnownHostsFile ~/Dev/config/ssh/known_hosts-managed ~/.ssh/known_hosts
 
-# The same physical computer dual-boots Linux and Windows.  Each OS is a
-# separate SSH server identity even though both use 192.168.50.30:22.
-Host ai lewis-linux
+Host ai
     HostName 192.168.50.30
+    Port 22
     User lewis
-    Port 22
-    IdentityFile ~/.ssh/id_ed25519
-    IdentitiesOnly yes
-    HostKeyAlias lewis-linux
-    HostKeyAlgorithms ssh-ed25519
-    UserKnownHostsFile ~/Dev/config/ssh/known_hosts-managed
-    StrictHostKeyChecking yes
-    CheckHostIP no
-    UpdateHostKeys no
-
-Host lewis-linux-root
-    HostName 192.168.50.30
-    User root
-    Port 22
-    IdentityFile ~/.ssh/id_ed25519
-    IdentitiesOnly yes
-    HostKeyAlias lewis-linux
-    HostKeyAlgorithms ssh-ed25519
-    UserKnownHostsFile ~/Dev/config/ssh/known_hosts-managed
-    StrictHostKeyChecking yes
-    CheckHostIP no
-    UpdateHostKeys no
-
-Host windows lewis-windows
-    HostName 192.168.50.30
-    Port 22
-    IdentityFile ~/.ssh/id_ed25519
-    IdentitiesOnly yes
-    HostKeyAlias lewis-windows
+    HostKeyAlias ai
     HostKeyAlgorithms ssh-ed25519
     UserKnownHostsFile ~/Dev/config/ssh/known_hosts-managed
     StrictHostKeyChecking yes
@@ -44,45 +17,28 @@ Host windows lewis-windows
     UpdateHostKeys no
 
 Host windows
+    HostName 192.168.50.30
+    Port 22
     User lewis
+    HostKeyAlias windows
+    HostKeyAlgorithms ssh-ed25519
+    UserKnownHostsFile ~/Dev/config/ssh/known_hosts-managed
+    StrictHostKeyChecking yes
+    CheckHostIP no
+    UpdateHostKeys no
 
-# Compatibility login for the Windows SSH account used before the lewis account
-# is verified or provisioned on the next Windows boot.
-Host lewis-windows
-    User lewisssh
 
 Host knowthatstuff
     HostName 23.94.221.195
-    User root
-    IdentityFile ~/.ssh/id_ed25519
     Port 22
-
-Host knowthatstuff-lewis
-    HostName 23.94.221.195
     User lewis
-    IdentityFile ~/.ssh/id_ed25519
-    Port 22
 
 Host swiftsay
     HostName 172.245.184.223
-    User root
-    IdentityFile ~/.ssh/id_ed25519
     Port 22
-
-Host swiftsay-lewis
-    HostName 172.245.184.223
     User lewis
-    IdentityFile ~/.ssh/id_ed25519
-    Port 22
 
 Host wordelites
     HostName 82.165.221.121
-    User root
-    IdentityFile ~/.ssh/id_ed25519
     Port 22
-
-Host wordelites-lewis
-    HostName 82.165.221.121
     User lewis
-    IdentityFile ~/.ssh/id_ed25519
-    Port 22
